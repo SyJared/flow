@@ -29,18 +29,25 @@ function Notification() {
   loadNotif(); // 🔥 THIS WAS MISSING
 }, []);
 
-const handleRead = async()=>{
+const handleRead = async () => {
   try {
-    const res = await markAsRead()
-    if (res.success){
-    setReadMessage(res.message)
-    setNotifications(prev=> ({ ...prev, is_read: 1}))
+    const res = await markAsRead();
+
+    if (res.success) {
+      setReadMessage(res.message);
+
+      setNotifications(prev =>
+        prev.map(n => ({
+          ...n,
+          is_read: 1
+        }))
+      );
     }
-    setReadMessage(res.message)
+
   } catch (error) {
-    console.log(err, 'handleread')
+    console.log(error, "handleread");
   }
-}
+};
 
 const hasUnread = notifications?.some?.(n => n.is_read === 0) ?? false
 

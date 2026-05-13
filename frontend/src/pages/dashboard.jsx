@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../features/auth/AuthContext";
-import { getAllTaskByUserId } from "../api/getTask";
+import { getAllTaskByUserId, getRecentActivity } from "../api/getTask";
 import { getWorkspaces } from "../api/createWorkspace";
 
 // ── helpers ──────────────────────────────────────────────────────────────────
@@ -95,6 +95,7 @@ function DashboardPage() {
   const [tasks, setTasks] = useState([]);
   const [workspaces, setWorkspaces] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [recentActivity, setRecentActivity] = useState([]);
 
   useEffect(() => {
     if (userLoading) return;
@@ -105,12 +106,14 @@ function DashboardPage() {
     if (!user?.id) return;
     const load = async () => {
       try {
-        const [taskData, wsData] = await Promise.all([
+        const [taskData, wsData, activityData] = await Promise.all([
           getAllTaskByUserId(user.id),
           getWorkspaces(),
+          getRecentActivity(),
         ]);
         setTasks(Array.isArray(taskData.results) ? taskData.results : []);
         setWorkspaces(Array.isArray(wsData.workspaces) ? wsData.workspaces : []);
+        setRecentActivity(activityData.results || []);
       } catch (err) {
         console.error("Dashboard load error:", err);
       } finally {
@@ -138,12 +141,7 @@ function DashboardPage() {
       return new Date(a.due_date) - new Date(b.due_date);
     });
 
-  // recent activity: tasks that are "doing" or "done", newest created_at first
-  const recentActivity = [...tasks]
-    .filter((t) => t.status === "doing" || t.status === "done")
-    .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
-    .slice(0, 5);
-
+ 
   // unique members across all workspaces via tasks
   const memberMap = new Map();
   tasks.forEach((t) => {
@@ -532,23 +530,28 @@ console.log(tasks)
           {/* Row 2: Recent activity + Members */}
           <div className="two-col">
             <SectionCard title="Recent activity">
-              {recentActivity.length === 0 ? (
-                <EmptyNote text="No recent activity." />
-              ) : (
-                recentActivity.map((t) => (
-                  <div key={t.id} className="act-row">
-                    <div className={`act-dot act-dot-${t.status}`} />
-                    <div className="act-text">
-                      {t.status === "done"
-                        ? `Completed "${t.title}"`
-                        : `Working on "${t.title}"`}
-                      <div className="act-ws">{t.workspace_name}</div>
-                    </div>
-                    <span className="act-date">{formatDate(t.created_at)}</span>
-                  </div>
-                ))
-              )}
-            </SectionCard>
+  {recentActivity.length === 0 ? (
+    <EmptyNote text="No recent activity." />
+  ) : (
+    recentActivity.slice(0, 5).map((a) => (
+      <div key={a.id} className="act-row">
+        <div className="act-dot" />
+
+        <div className="act-text">
+          {a.message}
+
+          <div className="act-ws">
+            {a.workspace_name} • {a.task_title}
+          </div>
+        </div>
+
+        <span className="act-date">
+          {formatDate(a.created_at)}
+        </span>
+      </div>
+    ))
+  )}
+</SectionCard>
 
             <SectionCard title="People you work with">
               {members.length === 0 ? (

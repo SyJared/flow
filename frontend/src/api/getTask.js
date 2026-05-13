@@ -33,3 +33,15 @@ export const getAllTaskByUserId = async (userId)=>{
   })
   return res.json()
 }
+
+export const getRecentActivity = async () => {
+  const token = localStorage.getItem("token");
+
+  const res = await fetch(`${BASE_URL}/get-recent-activity`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  return res.json();
+};

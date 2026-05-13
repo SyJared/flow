@@ -610,3 +610,31 @@ app.post("/api/auth/read-notif", authMiddleware, (req,res)=>{
   })
 })
 
+// recent activity
+app.get("/api/auth/get-recent-activity", authMiddleware, (req, res) => {
+  const userId = req.user.id;
+
+  const sql = `
+    SELECT 
+  tu.id,
+  tu.progress,
+  tu.message,
+  tu.created_at,
+  tu.hours_spent,
+  t.title AS task_title,
+  w.workspace_name
+FROM task_updates tu
+JOIN tasks t ON tu.task_id = t.id
+JOIN workspaces w ON tu.workspace_id = w.id
+WHERE tu.user_id = ?
+ORDER BY tu.created_at DESC
+LIMIT 5`;
+
+  db.query(sql, [userId], (err, results) => {
+    if (err) {
+      return res.status(500).json({ message: "server error" });
+    }
+
+    return res.json({ results });
+  });
+});
