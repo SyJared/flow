@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { handleStatusDoing, taskMarkAsDone } from "../../api/handleStatusChange";
 import { taskUpdates } from "../../api/taskUpdates";
 import { getTaskUpdates } from "../../api/getTask";
+import { useLocation } from "react-router-dom";
 
 function TaskModal({ isOpen, setIsOpen, selectedTask, user , workspaceId, setSelectedTask}) {
   const [updates, setUpdates] = useState([]);
@@ -13,6 +14,10 @@ function TaskModal({ isOpen, setIsOpen, selectedTask, user , workspaceId, setSel
 
   const [doneMessage, setDoneMessage] = useState('')
   const [taskUpdateId, setTaskUpdateId] = useState();
+  
+
+
+  
 
   function formatHoursSpent(decimalHours) {
   if (!decimalHours && decimalHours !== 0) return "0m";
@@ -29,6 +34,8 @@ function TaskModal({ isOpen, setIsOpen, selectedTask, user , workspaceId, setSel
 }  
 
   if (!isOpen || !selectedTask) return null;
+
+  
 
   useEffect(()=>{ 
     const loadUpdates= async()=>{
@@ -205,7 +212,15 @@ function TaskModal({ isOpen, setIsOpen, selectedTask, user , workspaceId, setSel
 
 function TaskList({tasks, tasksMessage, user, workspaceId}){
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedTask, setSelectedTask] = useState(null)
+  const [selectedTask, setSelectedTask] = useState(null);
+  const location = useLocation();
+
+  useEffect(() => {
+    if (location.state?.openTask) {
+      setSelectedTask(location.state.openTask);
+      setIsOpen(true);
+    }
+  }, [location.state]);
   const selected =(task)=>{
     setSelectedTask(task);
     setIsOpen(true)

@@ -9,6 +9,7 @@ import WorkspacePage from './pages/workspacePage'
 import Header from './features/header/header'
 
 import TasksPage from './pages/taskpage'
+import DashboardPage from './pages/dashboard'
 
 function App() {
   
@@ -17,6 +18,7 @@ function App() {
     <>
 <Header />
 <Routes>
+  <Route path='/dashboard' element={<DashboardPage />} />
   <Route path='/workspace/tasks/:userId' element={<TasksPage/>} />
   <Route path='/workspace/:id' element={<WorkspacePage />} />
   <Route path='/register' element={<Register />} />

@@ -269,7 +269,9 @@ function TasksPage() {
                 <TaskCard
                   key={task.id}
                   task={task}
-                  onClick={(t) => { setSelectedTask(t); setIsOpen(true); }}
+                  onClick={(t) => { setSelectedTask(t); setIsOpen(true);
+                    navigate(`/workspace/${t.workspace_id}`, { state: { openTask: t } })
+                   }}
                 />
               ))
             : <EmptyState />

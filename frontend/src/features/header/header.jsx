@@ -30,7 +30,7 @@ function Header() {
   const navLinks = [
   { label: "Dashboard", icon: LayoutDashboard, path: "/dashboard" },
 
-  { label: "Workspace", icon: FolderKanban, path: `/` },
+  { label: "Workspace", icon: FolderKanban, path: `/logged` },
   { label: "Tasks", icon: CheckSquare, path: `/workspace/tasks/${user?.id}` },
   { label: "Team", icon: Users, path: `/` },
 ];
