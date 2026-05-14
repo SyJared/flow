@@ -1,4 +1,3 @@
-require("dotenv").config();
 
 const express = require("express");
 const cors = require("cors");
@@ -15,10 +14,10 @@ app.use(express.json());
 
 // db
 const bcrypt = require("bcrypt");
-const { data } = require("react-router-dom");
-const assignedMiddleware = require("./middleware/assignedMiddleware");
-const { use } = require("react");
 
+const assignedMiddleware = require("./middleware/assignedMiddleware");
+
+console.log("DB_HOST =", process.env.DB_HOST);
 
 // register
 app.post("/api/auth/register", async (req,res)=> {
@@ -120,7 +119,8 @@ app.get("/api/auth/me", authMiddleware, (req, res) => {
 
 // START SERVER
 const PORT = 5000;
-app.listen(PORT, () => {
+
+app.listen(PORT, "0.0.0.0", () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
 

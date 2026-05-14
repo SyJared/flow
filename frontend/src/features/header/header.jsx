@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useAuth } from "../auth/AuthContext";
+import { useAuth } from "../auth/authContext";
 import { Bell, ChevronDown, Menu, LayoutDashboard, FolderKanban, CheckSquare, Users } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Notification from "../notification/notification";

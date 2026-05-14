@@ -6,7 +6,7 @@ import { assignMember, editMember } from "../api/assignMember";
 import { getWorkspaceMembers } from "../api/getWorkspaceById";
 import { createTask } from "../api/createTask";
 import { getTask } from "../api/getTask";
-import { useAuth } from "../features/auth/AuthContext";
+import { useAuth } from "../features/auth/authContext";
 import TaskList from "../features/task/tasklist";
 
 function getInitials(name = '') {

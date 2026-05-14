@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { loginUser } from "../../api/auth.js";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "./AuthContext.jsx";
+import { useAuth } from "./authContext.jsx";
 
 function Login() {
   const { setUser, user } = useAuth()
@@ -37,7 +37,7 @@ function Login() {
 
     } catch (err) {
       console.error(err);
-      setMessage(data.message);
+      setMessage(err.message);
     }
   };
 

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../features/auth/AuthContext";
+import { useAuth } from "../features/auth/authContext";
 import { getAllTaskByUserId, getRecentActivity } from "../api/getTask";
 import { getWorkspaces } from "../api/createWorkspace";
 

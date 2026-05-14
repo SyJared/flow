@@ -26,7 +26,7 @@ function Notification() {
     }
   };
 
-  loadNotif(); // 🔥 THIS WAS MISSING
+  loadNotif();
 }, []);
 
 const handleRead = async () => {

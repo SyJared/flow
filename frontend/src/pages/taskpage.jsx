@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useAuth } from "../features/auth/AuthContext";
+import { useAuth } from "../features/auth/authContext";
 import { getAllTaskByUserId, getTask } from "../api/getTask";
 import TaskList from "../features/task/tasklist";
 
