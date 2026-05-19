@@ -66,7 +66,7 @@ function WorkspacePage() {
       const tasksData = await getTask(id);
 
       setWorkspace(data.workspace);
-
+      console.log(data)
       // SAFE MEMBERS
       setMembers(membersData.members || []);
 

@@ -89,24 +89,11 @@ app.listen(PORT, "0.0.0.0", () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
 
-//create workspace edit workspace
+//create workspace edit workspace delete workspace
 const workspaceRoute = require("./routes/workspaceRoute");
 app.use("/api/workspaces", workspaceRoute);
 
-// 
 
-// delete workspace
-app.post("/api/auth/delete-workspace/:id", authMiddleware, roleMiddleware, (req,res)=>{
-  const {workspaceId} = req.body
-  const sql = "DELETE FROM workspaces WHERE id =?"
-  db.query(sql,[workspaceId],(err, results) =>{
-    if(err){return res.status(500).json({message: 'server error'})}
-    if(results.affectedRows){
-      return res.json({message: 'Workspace deleted successfully'})
-    }
-    return res.status(404).json({message: 'Workspace not found'})
-  } )
-})
 // get workspaces role
 app.get("/api/auth/workspaces", authMiddleware,(req, res)=>{
   const userId = req.user.id;
@@ -118,21 +105,7 @@ app.get("/api/auth/workspaces", authMiddleware,(req, res)=>{
     return res.json({workspaces: results});
   })
 })
-// get workspace by id
-app.get("/api/auth/workspace/:id",authMiddleware, (req, res)=>{
-  const userId = req.user.id;
-  const workspaceId = req.params.id;
-  const sql = "SELECT * FROM workspaces w JOIN workspace_members wm ON w.id = wm.workspace_id JOIN users u ON wm.user_id = u.id WHERE w.id = ? AND wm.user_id = ?";
-  db.query(sql, [workspaceId, userId],(err, results)=>{
-    if(err){
-      return res.status(500).json({message: "Server error"});
-    }
-    if(results.length === 0){
-      return res.status(404).json({message: "Workspace not found"});
-    }
-    return res.json({workspace: results[0]});
-  })
-})
+
 // search user by name
 app.get("/api/auth/search", authMiddleware, (req, res)=>{
   const {name} = req.query;
@@ -147,20 +120,11 @@ app.get("/api/auth/search", authMiddleware, (req, res)=>{
     return res.json({users: results, message: "Users found"});
   })
 })
-//get workspace members
-app.get("/api/auth/workspace-members/:id", authMiddleware, (req, res)=>{
-  const workspaceId = req.params.id;
-  const sql = "SELECT u.id, u.name, u.email, wm.role FROM users u JOIN workspace_members wm on u.id = wm.user_id WHERE wm.workspace_id = ?";
-  db.query(sql, [workspaceId], (err, results)=>{
-    if(err){
-      return res.status(500).json({message: "Server error"});
-    }
-    if(results.length === 0){
-      return res.json({message: 'no members'})
-    }
-    return res.json({members: results});
-  })
-})
+//member route
+const workspaceMemberRoute = require("./routes/workspaceMemberRoute");
+app.use("/api/member", workspaceMemberRoute);
+
+
 
 // assign and add member to workspace
 app.post("/api/auth/assign-member/:id", authMiddleware, roleMiddleware, (req, res)=>{

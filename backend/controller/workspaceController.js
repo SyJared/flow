@@ -1,3 +1,4 @@
+const { get } = require("../routes/loginRoute");
 const workspaceService = require("../services/workspaceService");
 
 const createWorkspace = async(req, res)=>{
@@ -57,4 +58,24 @@ const deleteWorkspace = async(req, res)=>{
     })
   }
 }
-  module.exports={createWorkspace, editWorkspace, deleteWorkspace};
+
+const getWorkspaceById = async(req, res)=>{
+  try {
+    const userId = req.user.id;
+    const {id} = req.params;
+    const workspace = await workspaceService.getWorkspaceById(id, userId);
+
+    return res.status(200).json({
+      success: true,
+      workspace: workspace.workspace,
+      message: "workspace retrieved successfully"
+    })
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      message: "Failed to retrieve workspace",
+      error: err.message
+    })
+  }
+}
+  module.exports={createWorkspace, editWorkspace, deleteWorkspace, getWorkspaceById};

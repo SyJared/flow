@@ -42,4 +42,19 @@ const deleteWorkspace = async (id)=>{
   })
 }
 
-module.exports = {createWorkspace, editWorkspace, deleteWorkspace};
+const getWorkspaceById = async (id, userId)=>{
+  return new Promise((resolve, reject)=>{
+    const sql = "SELECT * FROM workspaces w JOIN workspace_members wm ON w.id = wm.workspace_id JOIN users u ON wm.user_id = u.id WHERE w.id = ? AND wm.user_id = ?";
+    db.query(sql,[id, userId],(err,results)=>{
+      if(!id){return reject(new Error("Invalid workspace ID"))}
+      if(!userId){return reject(new Error("User ID is required"))}
+      if(err){return reject(err)}
+      if(results.length === 0){
+        return reject(new Error("Workspace not found or access denied"))
+      }
+      resolve({workspace: results[0]})
+    })
+  })
+}
+
+module.exports = {createWorkspace, editWorkspace, deleteWorkspace, getWorkspaceById};
