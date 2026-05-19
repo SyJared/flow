@@ -6,9 +6,9 @@ const createWorkspace = async(req, res)=>{
     const {name} = req.body;
     const workspace = await workspaceService.createWorkspace(userId, name);
 
-    return res.status(201).json({
+    return res.status(200).json({
       success: true,
-      data: workspace,
+      data: {id: workspace.workspaceId, workspace_name: workspace.name, role: "owner", created_at: new Date()},
       message: "workspace created successfully"
     })
   } catch (err) {
@@ -39,4 +39,22 @@ const editWorkspace = async(req, res)=>{
     })
   }
 }
-  module.exports={createWorkspace, editWorkspace};
+
+const deleteWorkspace = async(req, res)=>{
+  try {
+    const {id} = req.params;
+    const result = await workspaceService.deleteWorkspace(id);
+
+    return res.status(200).json({
+      success: true,
+      message: result.message
+    })
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      message: "Failed to delete workspace",
+      error: err.message
+    })
+  }
+}
+  module.exports={createWorkspace, editWorkspace, deleteWorkspace};

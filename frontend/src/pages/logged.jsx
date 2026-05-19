@@ -44,6 +44,8 @@ function LoggedIn() {
       setWorkspaces(prev => [...prev, data.data]);
       setName('');
       }
+      console.log(data);
+      console.log(workspaces)
       if(!data.success){
         setMessage(data.message);
       }
@@ -83,9 +85,13 @@ function LoggedIn() {
 
   const handleDelete = async (id) => {
     try {
-      const data = await deleteWorkspace({ workspaceId: id });
+      const data = await deleteWorkspace({ id });
+      if(data.success){
       setDeleteMessage(data.message);
       setWorkspaces(prev => prev.filter(w => w.id !== id));
+      }
+      
+      setDeleteMessage(data.message);
     } catch (error) {
       console.log(error);
     }

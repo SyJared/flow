@@ -40,15 +40,14 @@ export const editWorkspace = async ({ id, name }) => {
   return res.json();
 };
 
-export const deleteWorkspace = async ({workspaceId})=>{
+export const deleteWorkspace = async ({id})=>{
   const token = localStorage.getItem('token');
-  const res = await fetch(`${BASE_URL}/delete-workspace/${workspaceId}`, {
-    method: "POST",
+  const res = await fetch(`http://localhost:5000/api/workspaces/delete-workspace/${id}`, {
+    method: "DELETE",
     headers:{
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`
-    },
-    body: JSON.stringify({workspaceId})
+    }
   })
   return res.json()
 }

@@ -58,43 +58,8 @@ app.get("/", (req, res) => {
 
 
 // LOGIN ROUTE
-app.post("/api/auth/login", (req, res) => {
-  try {
-    const { email, password } = req.body;
-    const sql = "SELECT * FROM users WHERE email =?";
-    db.query(sql, [email], async (err, results)=>{
-      if(err){
-        console.error("Error fetching user:", err);
-        return res.status(500).json({ message: "Server error" });
-      }
-      if(results.length === 0){
-        return res.status(400).json({message: "User not found"});
-      }
-      const user = results[0];
-      const isMatch = await bcrypt.compare(password, user.password);
-      if(isMatch){
-        const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: "1h" });
-        return res.json({
-  token,
-  message: "Login successful",
-  success: true,
-  user: {
-    id: user.id,
-    name: user.name,
-    email: user.email,
-  }
-});
-      }
-      if(!isMatch){
-        return res.status(400).json({message: "Wrong password"})
-      }
-    })
-  } catch (err) {
-    console.error(err);
-    return res.status(500).json({ message: "Server error" });
-  }
-});
-
+const loginRoute = require('./routes/loginRoute');
+app.use("/api/auth", loginRoute);
 
 // PROTECTED ROUTE
 app.get("/api/auth/me", authMiddleware, (req, res) => {
@@ -104,7 +69,7 @@ app.get("/api/auth/me", authMiddleware, (req, res) => {
     if(err){
       return res.status(500).json({message: "error from auth/me"})
     }
-    if(res.length === 0){
+    if(results.length === 0){
       return res.status(201).json({message: "user not found"})
     }
     const user = results[0];
@@ -190,7 +155,7 @@ app.get("/api/auth/workspace-members/:id", authMiddleware, (req, res)=>{
     if(err){
       return res.status(500).json({message: "Server error"});
     }
-    if(results === 0){
+    if(results.length === 0){
       return res.json({message: 'no members'})
     }
     return res.json({members: results});

@@ -8,14 +8,14 @@ const createWorkspace = async (userId, name) => {
         return reject(err)
       }
       const workspaceId = results.insertId;
-      const sql2 = "INSERT INTO workspace_members (workspace_id, user_id) VALUES (?,?)"
-      db.query(sql2, [workspaceId, userId], (err2, results2)=>{
+      const sql2 = "INSERT INTO workspace_members (workspace_id, user_id, role) VALUES (?,?,?)"
+      db.query(sql2, [workspaceId, userId, 'owner'], (err2, results2)=>{
         if (err2){
           return reject(err2)
         }
         resolve({
-          id: workspaceId,
-          workspace_name: name
+          workspaceId,
+          name
         })
       })
     })
@@ -32,4 +32,14 @@ const editWorkspace = async (id, name)=>{
   })
 }
 
-module.exports = {createWorkspace, editWorkspace};
+const deleteWorkspace = async (id)=>{
+  return new Promise ((resolve, reject)=>{
+    const sql = "DELETE FROM workspaces WHERE id =?"
+    db.query(sql, [id], (err,results)=>{
+      if(err){return reject(err)}
+      resolve({message: "workspace deleted successfully"})
+    })
+  })
+}
+
+module.exports = {createWorkspace, editWorkspace, deleteWorkspace};
