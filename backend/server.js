@@ -124,36 +124,12 @@ app.listen(PORT, "0.0.0.0", () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
 
-//create workspace
-app.post("/api/auth/create-workspace",authMiddleware, (req, res)=>{
-  const {name}  = req.body;
-  const userId = req.user.id;
-  const sql = "INSERT INTO workspaces (owner_id, workspace_name) VALUES (?, ?)";
-  db.query(sql, [userId, name], (err, result)=>{
-    if(err){
-      return res.status(500).json({message: "Server error"});
-    }
-    const workspaceId = result.insertId;
-    const ownerSql="INSERT INTO workspace_members (workspace_id, user_id, role) VALUES (?, ?, 'owner')";
-    db.query(ownerSql, [workspaceId, userId], (err, result)=>{
-      if(err){
-        return res.status(500).json({message:"server error"});
-      }
-      return res.status(201).json({message: "Created successfully", data: result})
-    })
-  })
-})
-// edit workspace
-app.post("/api/auth/edit-workspace/:id", authMiddleware, roleMiddleware, (req,res)=>{
-  const {id, name} = req.body;
-  const sql ="UPDATE workspaces SET workspace_name=? WHERE id=?"
-  db.query(sql, [name, id],(err,results)=>{
-    if(err){
-      return res.status(500).json({message: 'Server erro'})
-    }
-    return res.json({message: "edited successfully"})
-  })
-})
+//create workspace edit workspace
+const workspaceRoute = require("./routes/workspaceRoute");
+app.use("/api/workspaces", workspaceRoute);
+
+// 
+
 // delete workspace
 app.post("/api/auth/delete-workspace/:id", authMiddleware, roleMiddleware, (req,res)=>{
   const {workspaceId} = req.body

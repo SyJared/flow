@@ -39,9 +39,14 @@ function LoggedIn() {
     try {
       if (!name) return setMessage('Please enter a workspace name');
       const data = await createWorkspace({ name });
+      if (data.success){
       setMessage(data.message);
       setWorkspaces(prev => [...prev, data.data]);
       setName('');
+      }
+      if(!data.success){
+        setMessage(data.message);
+      }
     } catch (err) {
       console.error(err);
       setMessage('Error creating workspace');
@@ -57,12 +62,15 @@ function LoggedIn() {
     try {
       const data = await editWorkspace({ id, name: editName });
 
-      setWorkspaces(prev =>
-        prev.map(w => w.id === id ? { ...w, workspace_name: editName } : w)
-      );
-
-      setEditMessage(data.message);
-      setEditingId(null);
+      if(data.success){
+        setEditMessage(data.message);
+        setWorkspaces(prev => prev.map(w => w.id === id ? { ...w, workspace_name: editName } : w));
+        setEditingId(null);
+        setEditName('');
+      }
+      if(!data.success){
+        setEditMessage(data.message);
+      }
     } catch (err) {
       console.error('Edit error:', err);
     }

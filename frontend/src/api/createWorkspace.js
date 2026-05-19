@@ -3,7 +3,7 @@ import { BASE_URL } from "./auth";
 
 export const createWorkspace = async (data) =>{
   const token = localStorage.getItem("token");
-  const res = await fetch (`${BASE_URL}/create-workspace`, {
+  const res = await fetch (`http://localhost:5000/api/workspaces/create-workspace`, {
     method: 'POST',
     headers:{
       'Content-Type': 'application/json',
@@ -28,13 +28,13 @@ export const getWorkspaces = async()=>{
 export const editWorkspace = async ({ id, name }) => {
   const token = localStorage.getItem('token');
 
-  const res = await fetch(`${BASE_URL}/edit-workspace/${id}`, {
-    method: "POST",
+  const res = await fetch(`http://localhost:5000/api/workspaces/edit-workspace/${id}`, {
+    method: "PUT",
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`
     },
-    body: JSON.stringify({ id, name })
+    body: JSON.stringify({ name })
   });
 
   return res.json();
