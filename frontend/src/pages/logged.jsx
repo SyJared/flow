@@ -37,7 +37,7 @@ function LoggedIn() {
   const handleCreateWorkspace = async (e) => {
     e.preventDefault();
     try {
-      if (!name) return setMessage('Please enter a workspace name');
+     
       const data = await createWorkspace({ name });
       if (data.success){
       setMessage(data.message);
@@ -47,7 +47,7 @@ function LoggedIn() {
       console.log(data);
       console.log(workspaces)
       if(!data.success){
-        setMessage(data.message);
+        setMessage(data.errors[0].message);
       }
     } catch (err) {
       console.error(err);

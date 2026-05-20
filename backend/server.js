@@ -16,6 +16,8 @@ app.use(express.json());
 const bcrypt = require("bcrypt");
 
 const assignedMiddleware = require("./middleware/assignedMiddleware");
+const errorMiddleware = require("./middleware/errorMiddleware");
+
 
 console.log("DB_HOST =", process.env.DB_HOST);
 
@@ -123,6 +125,9 @@ app.get("/api/auth/search", authMiddleware, (req, res)=>{
 //member route
 const workspaceMemberRoute = require("./routes/workspaceMemberRoute");
 app.use("/api/member", workspaceMemberRoute);
+
+
+
 
 
 
@@ -543,3 +548,4 @@ LIMIT 5`;
     return res.json({ results });
   });
 });
+app.use(errorMiddleware);

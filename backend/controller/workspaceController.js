@@ -1,7 +1,6 @@
-const { get } = require("../routes/loginRoute");
 const workspaceService = require("../services/workspaceService");
 
-const createWorkspace = async(req, res)=>{
+const createWorkspace = async(req, res, next)=>{
   try {
     const userId = req.user.id;
     const {name} = req.body;
@@ -13,15 +12,11 @@ const createWorkspace = async(req, res)=>{
       message: "workspace created successfully"
     })
   } catch (err) {
-    return res.status(500).json({
-      success: false,
-      message: "Failed to create workspace",
-      error: err.message
-    })
+   next(err);
   }
 }
 
-const editWorkspace = async(req, res)=>{
+const editWorkspace = async(req, res, next)=>{
   try {
     const {id} = req.params;
     const {name} = req.body;
@@ -33,15 +28,11 @@ const editWorkspace = async(req, res)=>{
       message: "workspace edited successfully"
     })
   } catch (err) {
-    return res.status(500).json({
-      success: false,
-      message: "Failed to edit workspace",
-      error: err.message
-    })
+    next(err);
   }
 }
 
-const deleteWorkspace = async(req, res)=>{
+const deleteWorkspace = async(req, res, next)=>{
   try {
     const {id} = req.params;
     const result = await workspaceService.deleteWorkspace(id);
@@ -51,15 +42,11 @@ const deleteWorkspace = async(req, res)=>{
       message: result.message
     })
   } catch (err) {
-    return res.status(500).json({
-      success: false,
-      message: "Failed to delete workspace",
-      error: err.message
-    })
+    next(err);
   }
 }
 
-const getWorkspaceById = async(req, res)=>{
+const getWorkspaceById = async(req, res, next)=>{
   try {
     const userId = req.user.id;
     const {id} = req.params;
@@ -71,11 +58,7 @@ const getWorkspaceById = async(req, res)=>{
       message: "workspace retrieved successfully"
     })
   } catch (err) {
-    return res.status(500).json({
-      success: false,
-      message: "Failed to retrieve workspace",
-      error: err.message
-    })
+    next(err);
   }
 }
   module.exports={createWorkspace, editWorkspace, deleteWorkspace, getWorkspaceById};
