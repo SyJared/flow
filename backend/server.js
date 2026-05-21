@@ -154,53 +154,8 @@ app.post("/api/auth/assign-member/:id", authMiddleware, roleMiddleware, (req, re
   })
 })
 // CREATE TASK
-app.post("/api/auth/create-task/:id", authMiddleware, roleMiddleware, async (req, res) => {
-  const { workspaceId, title, description, priority, dueDate, assignedTo } = req.body;
-  const userId = req.user.id;
-
-  const sql = `
-    INSERT INTO tasks 
-    (workspace_id, title, description, priority, due_date, assigned_to, assigned_by, created_by) 
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-  `;
-
-  db.query(sql,
-    [workspaceId, title, description, priority, dueDate, assignedTo, userId, userId],
-    async (err, result) => {
-
-      if (err) {
-        return res.status(500).json({ message: "server error" });
-      }
-
-      try {
-        // 🔔 create notification
-        const notifId = await createNotification(db, {
-          actor_id: userId,
-          task_id: result.insertId, // 👈 IMPORTANT FIX
-          workspace_id: workspaceId,
-          type: "create_task",
-          message: "Created a task"
-        });
-
-        await addNotificationReceivers(db, notifId, workspaceId, userId);
-
-        return res.status(201).json({
-          message: "Task created successfully",
-          taskId: result.insertId
-        });
-
-      } catch (notifErr) {
-        console.error("Notification error:", notifErr);
-
-        // still return success for task creation
-        return res.status(201).json({
-          message: "Task created but notification failed",
-          taskId: result.insertId
-        });
-      }
-    }
-  );
-});
+const taskRoute = require("./routes/taskRoute");
+app.use("/api/tasks", taskRoute);
 // get tasks by workspace id
 app.get("/api/auth/tasks/:id", authMiddleware, (req, res)=>{
   const workspaceId = req.params.id;

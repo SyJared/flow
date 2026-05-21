@@ -32,6 +32,7 @@ function WorkspacePage() {
 
   const [tasks, setTasks] = useState([]);
   const [tasksMessage, setTasksMessage] = useState('');
+  const [taskErrors, setTaskErrors] = useState([]);
 
   
 
@@ -114,14 +115,25 @@ function WorkspacePage() {
   };
 
   const handleCreateTask = async (e) => {
-    e.preventDefault();
-    try {
-      const res = await createTask(taskInfo);
+  e.preventDefault();
+
+  try {
+    const res = await createTask(taskInfo);
+
+    if (!res.success) {
+      setTaskErrors(res.errors || []);
       setTaskMessage(res.message);
-    } catch (err) {
-      console.error(err);
+      return;
     }
-  };
+
+    setTaskErrors([]);
+    setTaskMessage(res.message);
+
+  } catch (err) {
+    console.error(err);
+    setTaskMessage("Server error");
+  }
+};
 
   const handleMemberEdit = async (e) => {
     e.preventDefault();
@@ -391,6 +403,15 @@ function WorkspacePage() {
                 Create Task
               </button>
               {taskMessage && <p className="text-xs text-gray-800 bg-amber-100/30 border border-amber-200 rounded-lg px-3 py-2">{taskMessage}</p>}
+              {taskErrors.length > 0 && (
+  <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+    {taskErrors.map((err, index) => (
+      <p key={index} className="text-sm text-red-700">
+        {err.field}: {err.message}
+      </p>
+    ))}
+  </div>
+)}
             </form>
           </div>
         </div>
