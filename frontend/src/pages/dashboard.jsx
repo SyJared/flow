@@ -14,7 +14,7 @@ function getInitials(name = "") {
     .toUpperCase()
     .slice(0, 2);
 }
-
+ //ddd
 function formatDate(d) {
   if (!d) return "—";
   return new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric" });
