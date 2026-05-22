@@ -98,8 +98,10 @@ const hasUnread = notifications?.some?.(n => n.is_read === 0) ?? false
 
           {n.task_title && (
             <span className="font-semibold"> {n.task_title}</span>
+            
           )}
         </p>
+        <span className="font-semibold"> {n.message}</span>
 
         <p className="text-[10px] text-[#9A8678] mt-1">
           {new Date(n.created_at).toLocaleString()}

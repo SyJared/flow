@@ -269,70 +269,8 @@ app.post("/api/auth/status-doing/:id", authMiddleware, assignedMiddleware, (req,
   });
 });
 // task update table
-app.post("/api/auth/task-update/:id", authMiddleware, assignedMiddleware, (req, res) => {
-  const { id, taskId, workspaceId, message, progress } = req.body;
-
-  // 🔥 validation
-  if (!taskId || !workspaceId) {
-    return res.status(400).json({ message: "Missing task or workspace" });
-  }
-
-  if (!message || message.trim() === "") {
-    return res.status(400).json({ message: "Update message is required" });
-  }
-
-  if (!progress || Number(progress) === 0) {
-    return res.status(400).json({ message: "Progress must be greater than 0%" });
-  }
-  // ✅ correct order (progress BEFORE message)
-  const sql = `
-    INSERT INTO task_updates 
-    (user_id, task_id, workspace_id, progress, message, hours_spent) 
-    VALUES (?, ?, ?, ?, ?, ?)
-  `;
-  const getLastSql = `
-  SELECT created_at 
-  FROM task_updates 
-  WHERE task_id = ? 
-  ORDER BY created_at DESC 
-  LIMIT 1
-`;
-db.query(getLastSql, [taskId], (err, results) => {
-  if (err) {
-    return res.status(500).json({ message: "server error" });
-  }
-
-  let hoursSpent = 0;
-
-  if (results.length > 0) {
-      const lastTime = new Date(results[0].created_at);
-      const now = new Date();
-
-      hoursSpent = (now - lastTime) / (1000 * 60 * 60);
-    }
-
-  db.query(sql, [id, taskId, workspaceId, Number(progress), message, hoursSpent], (err, results) => {
-    if (err) {
-      return res.status(500).json({ message: "server error" });
-    }
-
-    return res.json({
-  message: "Successfully inserted update",
-  update: {
-    id: results.insertId,
-    taskId,
-    workspaceId,
-    userId: id,
-    progress: Number(progress),
-    message,
-    hours_spent: hoursSpent,
-    created_at: new Date()
-  }
-});
-  });
-});
-});
-
+const taskUpdateRoute = require("./routes/taskUpdateRoute");
+app.use("/api/task-update", taskUpdateRoute);
   
 //get tasksupdates
 app.get("/api/auth/get-taskUpdates/:taskId/:workspaceId", authMiddleware, (req,res)=>{
