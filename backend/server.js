@@ -271,21 +271,6 @@ app.post("/api/auth/status-doing/:id", authMiddleware, assignedMiddleware, (req,
 // task update table
 const taskUpdateRoute = require("./routes/taskUpdateRoute");
 app.use("/api/task-update", taskUpdateRoute);
-  
-//get tasksupdates
-app.get("/api/auth/get-taskUpdates/:taskId/:workspaceId", authMiddleware, (req,res)=>{
-  const {workspaceId, taskId} = req.params;
-  const sql = "SELECT id, progress, message, created_at, hours_spent from task_updates WHERE workspace_id =? AND task_id =? ORDER BY created_at DESC";
-  db.query(sql, [workspaceId, taskId], (err, results)=>{
-    if(err){
-      return res.status(500).json({message: "server error"})
-    } 
-    if(results.length===0){
-      return res.json({message: 'There are no updates yet'})
-    }
-    return res.json({results})
-  })
-})
 
 //mark task as done
 app.post("/api/auth/mark-done/:id", authMiddleware, roleMiddleware, (req, res) => {

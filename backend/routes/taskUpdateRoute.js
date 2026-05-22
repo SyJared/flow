@@ -7,5 +7,6 @@ const validate = require("../middleware/validationMiddleware");
 const { taskUpdateSchema } = require('../validations/taskUpdateSchema');
 
 router.put('/update', authMiddleware, assignedMiddleware, validate(taskUpdateSchema), taskUpdateController.updateTask);
+router.get('/get-updates/:workspaceId/:taskId', authMiddleware, taskUpdateController.getTaskUpdates);
 
 module.exports = router;

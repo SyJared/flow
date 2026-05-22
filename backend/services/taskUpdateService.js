@@ -83,4 +83,15 @@ db.query(getLastSql, [taskId], (err, results) => {
   })
 }
 
-module.exports = {updateTask} 
+const getTaskUpdates = (workspaceId, taskId) => {
+  return new Promise((resolve, reject)=>{
+    const sql = "SELECT id, progress, message, created_at, hours_spent from task_updates WHERE workspace_id =? AND task_id =? ORDER BY created_at DESC";
+    db.query(sql, [workspaceId, taskId], (err, results)=>{
+      if(err){
+        return reject(err)
+      }
+      return resolve(results)
+    })
+  })
+}
+module.exports = {updateTask, getTaskUpdates} 

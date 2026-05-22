@@ -14,9 +14,9 @@ export const getTask = async (id)=>{
 
 export const getTaskUpdates = async (data)=>{
   const token = localStorage.getItem('token');
-  const res = await fetch(`${BASE_URL}/get-taskUpdates/${data.taskId}/${data.workspaceId}`, {
+  const res = await fetch(`http://localhost:5000/api/task-update/get-updates/${data.workspaceId}/${data.taskId}`, {
     method: "GET",
-    headers: {
+    headers: {  
       Authorization :`Bearer ${token}`
     }
   })
