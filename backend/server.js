@@ -95,19 +95,6 @@ app.listen(PORT, "0.0.0.0", () => {
 const workspaceRoute = require("./routes/workspaceRoute");
 app.use("/api/workspaces", workspaceRoute);
 
-
-// get workspaces role
-app.get("/api/auth/workspaces", authMiddleware,(req, res)=>{
-  const userId = req.user.id;
-  const sql = "SELECT w.id, w.workspace_name, w.created_at, wm.role FROM workspaces w JOIN workspace_members wm ON w.id = wm.workspace_id WHERE wm.user_id = ?";
-  db.query(sql, [userId], (err, results)=>{
-    if(err){
-      return res.status(500).json({message: "Server error"});
-    }
-    return res.json({workspaces: results});
-  })
-})
-
 // search user by name
 app.get("/api/auth/search", authMiddleware, (req, res)=>{
   const {name} = req.query;
@@ -156,20 +143,8 @@ app.post("/api/auth/assign-member/:id", authMiddleware, roleMiddleware, (req, re
 // CREATE TASK
 const taskRoute = require("./routes/taskRoute");
 app.use("/api/tasks", taskRoute);
-// get tasks by workspace id
-app.get("/api/auth/tasks/:id", authMiddleware, (req, res)=>{
-  const workspaceId = req.params.id;
-  const sql = "SELECT * FROM tasks WHERE workspace_id = ?";
-  db.query(sql, [workspaceId], (err, results)=>{
-    if(err){
-      return res.status(500).json({message: "Server error"});
-    }
-    if(results.length === 0){
-      return res.json({message: "No tasks. Create one!"});
-    }
-    return res.json({tasks: results});
-  })
-})
+
+
 // get all task
 app.get("/api/auth/all-task/:userId", authMiddleware, (req, res) => {
 

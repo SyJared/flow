@@ -74,4 +74,16 @@ const createTask = async (
   });
 };
 
-module.exports = { createTask };
+const getTaskByWorkspaceId = async (workspaceId)=>{
+  return new Promise((resolve, reject)=>{
+  const sql = "SELECT * FROM tasks WHERE workspace_id = ?";
+    db.query(sql, [workspaceId], (err, results)=>{
+      if(err){
+        return reject(err);
+      }
+      resolve(results);
+    })
+  })
+}
+
+module.exports = { createTask, getTaskByWorkspaceId };

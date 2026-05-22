@@ -22,6 +22,7 @@ function ProgressPips({ value }) {
 function TaskModal({ isOpen, setIsOpen, selectedTask, user, workspaceId, setSelectedTask }) {
   const [updates, setUpdates] = useState([]);
   const [message, setMessage] = useState("");
+  
   const [progress, setProgress] = useState(0);
   const [doingMessage, setDoingMessage] = useState("");
   const [submitMessage, setSubmitMessage] = useState("");
@@ -282,7 +283,7 @@ function TaskModal({ isOpen, setIsOpen, selectedTask, user, workspaceId, setSele
   );
 }
 
-function TaskList({ tasks, tasksMessage, user, workspaceId }) {
+function TaskList({ tasks, taskMessage, user, workspaceId }) {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState(null);
   const location = useLocation();
@@ -309,11 +310,7 @@ function TaskList({ tasks, tasksMessage, user, workspaceId }) {
           </span>
         </div>
         <div className="p-4">
-          {tasksMessage && (
-            <p className="mb-3 text-xs text-gray-800 bg-amber-100/30 border border-amber-200 rounded-lg px-3 py-2">
-              {tasksMessage}
-            </p>
-          )}
+          
           {tasks.length > 0 ? (
             <div className="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-4">
               {tasks.map((task) => (
@@ -372,7 +369,7 @@ function TaskList({ tasks, tasksMessage, user, workspaceId }) {
               ))}
             </div>
           ) : (
-            <p className="text-center text-sm text-gray-500 italic py-10">No tasks yet. Create one above.</p>
+            <p className="text-center text-sm text-gray-500 italic py-10">{taskMessage}</p>
           )}
         </div>
       </div>

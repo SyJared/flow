@@ -15,12 +15,12 @@ function getInitials(name = '') {
 
 function WorkspacePage() {
 
-  const{user, userLoading} = useAuth()
+  const {user, userLoading} = useAuth()
   const navigate = useNavigate()
   const [loading, setLoading] = useState(true);
   const [workspace, setWorkspace] = useState(null);
   const { id } = useParams();
-
+ 
   const [nameParam, setNameParam] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [searchMessage, setSearchMessage] = useState('');
@@ -51,6 +51,8 @@ function WorkspacePage() {
   const [selectedEdit, setSelectedEdit] = useState();
   const [editMemberRoleMessage, setEditMemberRoleMessage] = useState('');
 
+  const [taskListMessage, setTaskListMessage] = useState('');
+
   useEffect(() => {
   if (userLoading) return; // IMPORTANT
 
@@ -62,10 +64,11 @@ function WorkspacePage() {
   useEffect(() => {
   const loadWorkspace = async () => {
     try {
+      const workspaceId = id;
       const data = await getWorkspaceById(id);
       const membersData = await getWorkspaceMembers(id);
-      const tasksData = await getTask(id);
-
+      const tasksData = await getTask(workspaceId);
+      console.log("Workspace data: ", tasksData);
       setWorkspace(data.workspace);
       console.log(data)
       // SAFE MEMBERS

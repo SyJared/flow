@@ -16,7 +16,7 @@ export const createWorkspace = async (data) =>{
 
 export const getWorkspaces = async()=>{
   const token = localStorage.getItem("token");
-  const res = await fetch(`${BASE_URL}/workspaces`,{
+  const res = await fetch(`http://localhost:5000/api/workspaces/all-workspace`,{
     method:'GET',
     headers:{
       Authorization: `Bearer ${token}`

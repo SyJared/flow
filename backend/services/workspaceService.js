@@ -57,4 +57,14 @@ const getWorkspaceById = async (id, userId)=>{
   })
 }
 
-module.exports = {createWorkspace, editWorkspace, deleteWorkspace, getWorkspaceById};
+const getAllworkspaceForUser = async (userId)=>{
+  return new Promise((resolve,reject)=>{
+     const sql = "SELECT w.id, w.workspace_name, w.created_at, wm.role FROM workspaces w JOIN workspace_members wm ON w.id = wm.workspace_id WHERE wm.user_id = ?";
+  db.query(sql, [userId], (err, results)=>{
+    if(err){return reject(err)}
+    resolve({workspaces: results})
+  })
+  })
+}
+
+module.exports = {createWorkspace, editWorkspace, deleteWorkspace, getWorkspaceById, getAllworkspaceForUser};

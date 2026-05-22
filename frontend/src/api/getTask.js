@@ -1,8 +1,8 @@
 import { BASE_URL } from "./auth";
 
-export const getTask = async (id)=>{
+export const getTask = async (workspaceId)=>{
   const token = localStorage.getItem("token");
-  const res = await fetch(`${BASE_URL}/tasks/${id}`, {
+  const res = await fetch(`http://localhost:5000/api/tasks/get-tasks/${workspaceId}`, {
     method: "GET",
     headers:{
       'Content-Type': 'application/json',
