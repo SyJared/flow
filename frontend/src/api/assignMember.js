@@ -13,15 +13,15 @@ export const assignMember = async (data) =>{
   return res.json();
 }
 
-export const editMember = async (data) =>{
+export const editMember = async ({id, role, memberId}) =>{
   const token = localStorage.getItem('token');
-  const res = await fetch(`${BASE_URL}/edit-member/${data.id}`,{
-    method: 'POST',
+  const res = await fetch(`http://localhost:5000/api/member/edit-role/${id}`,{
+    method: 'PUT',
     headers:{
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${token}`
     },
-    body: JSON.stringify(data)
+    body: JSON.stringify({role, memberId})
   })
   return res.json();
 }

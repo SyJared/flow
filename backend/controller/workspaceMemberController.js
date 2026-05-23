@@ -18,4 +18,20 @@ const getWorkspaceMembers = async(req, res)=>{
   }
 }
 
-module.exports = {getWorkspaceMembers}
+const editWorkspaceMemberRole = async(req, res, next)=>{
+  try {
+    const workspaceId = req.params.id;
+    const {role, memberId} = req.body;
+
+    const result = await workspaceMemberService.editWorkspaceMemberRole(workspaceId, role, memberId);
+
+    return res.status(200).json({
+      success: true,
+      message: result.message
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+module.exports = {getWorkspaceMembers, editWorkspaceMemberRole}

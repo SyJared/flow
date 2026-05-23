@@ -143,6 +143,7 @@ function WorkspacePage() {
     try {
       const res = await editMember({ id: id, role: memberRoleEdit.role, memberId: selectedEdit.id });
       setEditMemberRoleMessage(res.message);
+      console.log(res);
     } catch (err) {
       console.log(err);
     }

@@ -145,42 +145,7 @@ const taskRoute = require("./routes/taskRoute");
 app.use("/api/tasks", taskRoute);
 
 
-// get all task
-app.get("/api/auth/all-task/:userId", authMiddleware, (req, res) => {
 
-  const { userId } = req.params;
-
-  const sql = `
-    SELECT
-      t.id,
-      t.title,
-      t.description,
-      t.status,
-      t.priority,
-      t.due_date,
-      t.created_at,
-      t.workspace_id,
-      t.assigned_to,
-      w.workspace_name
-    FROM tasks t
-    JOIN workspaces w
-      ON t.workspace_id = w.id
-    WHERE t.assigned_to = ?
-  `;
-
-  db.query(sql, [userId], (err, results) => {
-
-    if (err) {
-      console.log(err);
-      return res.status(500).json({
-        message: "server error all task"
-      });
-    }
-
-    return res.json({ results });
-
-  });
-});
 // edit member role
 app.post("/api/auth/edit-member/:id", authMiddleware, roleMiddleware,  (req, res)=>{
   const workspaceId = req.params.id;

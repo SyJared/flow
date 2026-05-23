@@ -86,7 +86,7 @@ function TaskCard({ task, onClick }) {
   );
 }
 
-function EmptyState() {
+function EmptyState({ error }) {
   return (
     <div className="col-span-full flex flex-col items-center justify-center py-24 text-center">
       <div className="w-16 h-16 rounded-2xl bg-[#202940]/5 flex items-center justify-center mb-4">
@@ -95,7 +95,12 @@ function EmptyState() {
             d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
         </svg>
       </div>
-      <p className="text-[#202940] font-semibold mb-1">No tasks yet</p>
+      {/* Error */}
+        {error && (
+          <div className="mb-4 px-4 py-3 bg-amber-50 border border-amber-200 rounded-xl text-sm text-amber-800">
+            {error}
+          </div>
+        )}
       <p className="text-sm text-gray-400">Tasks assigned to this workspace will appear here.</p>
     </div>
   );
@@ -133,8 +138,10 @@ function TasksPage() {
           
         } else {
           setTasks([]);
-          setError(data.message || "No tasks found.");
+          setError(data.message);
         }
+
+        console.log("Fetched tasks:", data);
       } catch (err) {
         console.error(err);
         setError("Failed to load tasks.");
@@ -255,12 +262,7 @@ function TasksPage() {
           </select>
         </div>
 
-        {/* Error */}
-        {error && (
-          <div className="mb-4 px-4 py-3 bg-amber-50 border border-amber-200 rounded-xl text-sm text-amber-800">
-            {error}
-          </div>
-        )}
+        
 
         {/* Task Grid */}
         <div className="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-4">
@@ -274,7 +276,7 @@ function TasksPage() {
                    }}
                 />
               ))
-            : <EmptyState />
+            : <EmptyState error={error} />
           }
         </div>
       </div>

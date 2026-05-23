@@ -46,4 +46,19 @@ const getTasksByWorkspaceId = async (req, res, next) => {
   }
 }
 
-module.exports = { createTask, getTasksByWorkspaceId }
+const getAllTaskByUserId = async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+    const tasks = await taskService.getAllTaskByUserId(userId);
+    if(tasks.length === 0){
+      throw new appError("No tasks found for the user", 404);
+    }
+    return res.status(200).json({
+      success: true,
+      results: tasks
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+module.exports = { createTask, getTasksByWorkspaceId , getAllTaskByUserId};

@@ -86,4 +86,32 @@ const getTaskByWorkspaceId = async (workspaceId)=>{
   })
 }
 
-module.exports = { createTask, getTaskByWorkspaceId };
+const getAllTaskByUserId = async (userId) => {
+  return new Promise((resolve, reject)=>{
+    const sql = `
+    SELECT
+      t.id,
+      t.title,
+      t.description,
+      t.status,
+      t.priority,
+      t.due_date,
+      t.created_at,
+      t.workspace_id,
+      t.assigned_to,
+      w.workspace_name
+    FROM tasks t
+    JOIN workspaces w
+      ON t.workspace_id = w.id
+    WHERE t.assigned_to = ?
+  `;
+    db.query(sql,[userId],(err, results)=>{
+      if(err){
+        return reject(err);
+      }
+      resolve(results);
+    })
+  })
+}
+
+module.exports = { createTask, getTaskByWorkspaceId, getAllTaskByUserId };

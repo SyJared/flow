@@ -25,7 +25,7 @@ export const getTaskUpdates = async (data)=>{
 
 export const getAllTaskByUserId = async (userId)=>{
   const token = localStorage.getItem('token');
-  const res = await fetch(`${BASE_URL}/all-task/${userId}`,{
+  const res = await fetch(`http://localhost:5000/api/tasks/all-task/${userId}`,{
     method: 'GET',
     headers:{
       Authorization: `Bearer ${token}`

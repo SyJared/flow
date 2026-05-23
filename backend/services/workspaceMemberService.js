@@ -1,4 +1,5 @@
 const db = require("../config/db")
+const AppError = require("../utils/appError");
 
 const getWorkspaceMembers = async (workspaceId) => {
   return new Promise((resolve, reject)=>{
@@ -13,4 +14,62 @@ const getWorkspaceMembers = async (workspaceId) => {
   }
 )}
 
-module.exports = {getWorkspaceMembers}
+
+
+const editWorkspaceMemberRole = async (
+  workspaceId,
+  role,
+  memberId
+) => {
+  return new Promise((resolve, reject) => {
+
+    const checkSql =
+      "SELECT role FROM workspace_members WHERE user_id = ? AND workspace_id = ?";
+
+    db.query(
+      checkSql,
+      [memberId, workspaceId],
+      (err, results) => {
+
+        if (err) {
+          return reject(err);
+        }
+
+        if (results.length === 0) {
+          return reject(
+            new AppError("Member not found", 404)
+          );
+        }
+
+        if (results[0].role === "owner") {
+          return reject(
+            new AppError(
+              "Owner role cannot be changed",
+              403
+            )
+          );
+        }
+
+        const updateSql =
+          "UPDATE workspace_members SET role = ? WHERE user_id = ? AND workspace_id = ?";
+
+        db.query(
+          updateSql,
+          [role, memberId, workspaceId],
+          (err) => {
+
+            if (err) {
+              return reject(err);
+            }
+
+            resolve({
+              message:
+                "Member role updated successfully"
+            });
+          }
+        );
+      }
+    );
+  });
+};
+module.exports = {getWorkspaceMembers, editWorkspaceMemberRole}
