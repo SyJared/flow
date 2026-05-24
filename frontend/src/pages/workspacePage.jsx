@@ -112,6 +112,10 @@ function WorkspacePage() {
     try {
       const res = await assignMember({ workspaceId: id, userId: selectedUser.user.id, role: selectedUser.role });
       setAssignMessage(res.message);
+      if(res?.errors){
+        setAssignMessage(res.errors.map(e => `${e.message}`).join('\n'));
+      }
+      console.log(res);
     } catch (err) {
       console.error(err);
     }
