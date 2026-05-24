@@ -2,7 +2,7 @@ import { BASE_URL } from "./auth";
 
 export const assignMember = async (data) =>{
   const token = localStorage.getItem("token");
-  const res = await fetch (`${BASE_URL}/assign-member/${data.workspaceId}`,{
+  const res = await fetch (`http://localhost:5000/api/member/add-member/${data.workspaceId}`,{
     method: 'POST',
     headers:{
       'Content-Type': 'application/json',

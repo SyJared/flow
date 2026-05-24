@@ -114,50 +114,13 @@ const workspaceMemberRoute = require("./routes/workspaceMemberRoute");
 app.use("/api/member", workspaceMemberRoute);
 
 
-
-
-
-
-// assign and add member to workspace
-app.post("/api/auth/assign-member/:id", authMiddleware, roleMiddleware, (req, res)=>{
-  const {workspaceId, userId, role} = req.body;
-  const sql = "INSERT INTO workspace_members (workspace_id, user_id, role) VALUES (?, ?, ?)";
-  const checkSql = "SELECT * FROM workspace_members WHERE workspace_id = ? AND user_id = ?";
-  db.query(checkSql, [workspaceId, userId], (err, results)=>{
-    if(err){
-      return res.status(500).json({message: "Server error"});
-    }
-    if(results.length > 0){
-      return res.json({message: "User already a part of this workspace"});
-    }
-    db.query(sql, [workspaceId, userId, role], (err, result)=>{
-      if(err){
-        return res.status(500).json({message: "Server error"});
-      }
-
-      
-      return res.json({message: "Member assigned successfully", data: result})
-    })
-  })
-})
 // CREATE TASK
 const taskRoute = require("./routes/taskRoute");
 app.use("/api/tasks", taskRoute);
 
 
 
-// edit member role
-app.post("/api/auth/edit-member/:id", authMiddleware, roleMiddleware,  (req, res)=>{
-  const workspaceId = req.params.id;
-  const {memberId, role} = req.body
-  const sql = 'UPDATE workspace_members SET role=? WHERE user_id =? AND workspace_id =?'
-  db.query(sql, [role, memberId, workspaceId], (err, results)=>{
-    if(err){
-      return res.status(500).json({message: "Server error"})
-    }
-    return res.json({message: 'successful'})
-  })
-})
+
 // mark as doing
 app.post("/api/auth/status-doing/:id", authMiddleware, assignedMiddleware, (req, res) => {
   const { id, status, workspaceId, taskId } = req.body;

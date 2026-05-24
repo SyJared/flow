@@ -14,8 +14,6 @@ const getWorkspaceMembers = async (workspaceId) => {
   }
 )}
 
-
-
 const editWorkspaceMemberRole = async (
   workspaceId,
   role,
@@ -72,4 +70,21 @@ const editWorkspaceMemberRole = async (
     );
   });
 };
-module.exports = {getWorkspaceMembers, editWorkspaceMemberRole}
+
+const addWorkspaceMember = async (workspaceId, userId, role) => {
+  return new Promise((resolve, reject)=>{
+    const sql = "INSERT INTO workspace_members (workspace_id, user_id, role) VALUES (?, ?, ?)";
+  const checkSql = "SELECT * FROM workspace_members WHERE workspace_id = ? AND user_id = ?";
+  db.query(checkSql, [workspaceId, userId], (err, results)=>{
+    if(err){return reject(err)}
+    if(results.length > 0){
+      return reject(new AppError("User is already a member of this workspace", 400))
+    }
+    db.query(sql, [workspaceId, userId, role], (err, result)=>{
+      if(err){return reject(err)}
+      resolve({message: "Member assigned successfully", data: result})
+    })
+  })
+  })
+}
+module.exports = {getWorkspaceMembers, editWorkspaceMemberRole, addWorkspaceMember}
