@@ -22,4 +22,20 @@ const login = async (req, res) => {
   }
 }
 
-module.exports = { login }
+const registerUser = async (req, res) => {
+  const { name, email, password } = req.body;
+  try {
+    const result = await loginService.registerUser(name, email, password);
+    return res.status(201).json({
+      success: true,
+      message: result.message
+    });
+  } catch (err) {
+    return res.status(400).json({
+      success: false,
+      message: err.message
+    });
+  }
+}
+
+module.exports = { login, registerUser}

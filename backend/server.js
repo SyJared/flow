@@ -21,37 +21,6 @@ const errorMiddleware = require("./middleware/errorMiddleware");
 
 console.log("DB_HOST =", process.env.DB_HOST);
 
-// register
-app.post("/api/auth/register", async (req,res)=> {
-  try {
-    const {name, email, password} = req.body;
-
-    const hashed = await bcrypt.hash(password, 10);
-    const checkSql = "SELECT * FROM users WHERE email = ?";
-    const sql = 'INSERT INTO users (name, email, password) VALUES (?, ?, ?)';
-    db.query(checkSql, [email], (err,results)=>{
-      if(err){
-        console.error("Error checking user:", err);
-        return res.status(500).json({message: "Server error"});
-      }
-      if(results.length > 0){
-        return res.status(400).json({message: "User already exists"});
-      }
-      db.query(sql, [name, email, hashed], (err, result) => {
-      if(err){
-        console.error('Error inserting user:', err);
-        return res.status(500).json({message: 'Server error'});
-      }
-      return res.status(201).json({message: 'User created successfully'});
-    })
-    })
-    
-    
-  }catch(err){
-    console.error(err);
-    return res.status(500).json({message: 'Server error'});
-  }
-});
 
 // TEST ROUTE
 app.get("/", (req, res) => {
@@ -59,7 +28,7 @@ app.get("/", (req, res) => {
 });
 
 
-// LOGIN ROUTE
+// LOGIN and REGISTER ROUTE
 const loginRoute = require('./routes/loginRoute');
 app.use("/api/auth", loginRoute);
 

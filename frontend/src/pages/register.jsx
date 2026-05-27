@@ -13,8 +13,13 @@ function Register(){
     e.preventDefault();
     try{
       const data = await registerUser({ name, email, password });
-      console.log("Registered:", data);
-      setMessage(data.message);
+      
+      if(data.errors){
+        setMessage(data.errors.map(e => `${e.message}`).join("\n"));
+      }else{
+        setMessage(data.message);
+      }
+      
     }catch(err){
         console.error(err);
     }

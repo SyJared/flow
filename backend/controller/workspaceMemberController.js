@@ -37,8 +37,8 @@ const editWorkspaceMemberRole = async(req, res, next)=>{
 const addWorkspaceMember = async(req, res, next)=>{
   try {
     const {workspaceId, userId, role} = req.body;
+    
     const result = await workspaceMemberService.addWorkspaceMember(workspaceId, userId, role);
-
     return res.status(200).json({
       success: true,
       message: result.message,
