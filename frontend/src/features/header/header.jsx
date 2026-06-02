@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useAuth } from "../auth/authContext";
-import { Bell, ChevronDown, Menu, LayoutDashboard, FolderKanban, CheckSquare, Users } from "lucide-react";
+import { Bell, ChevronDown, Menu, LayoutDashboard, FolderKanban, CheckSquare, Users, X } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Notification from "../notification/notification";
 
@@ -8,149 +8,601 @@ function Header() {
   const { user, userLoading, logout } = useAuth();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
-  const name = user?.name || "User";
-  const initials = name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2);
   const navigate = useNavigate();
   const location = useLocation();
 
+  const isLoggedIn = !!user;
+  const name = user?.name || "User";
+  const initials = name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2);
+
   const handleLogout = async () => {
     await logout();
+    setIsDropdownOpen(false);
     navigate("/login");
   };
 
-
-  const workspaceMatch = location.pathname.match(/^\/workspace\/([^/]+)/);
-  const workspaceId = workspaceMatch ? workspaceMatch[1] : null;
-
-
   const isActive = (path) => location.pathname === path;
 
-
   const navLinks = [
-  { label: "Dashboard", icon: LayoutDashboard, path: "/dashboard" },
+    { label: "Dashboard", icon: LayoutDashboard, path: "/dashboard" },
+    { label: "Workspace", icon: FolderKanban, path: "/logged" },
+    { label: "Tasks", icon: CheckSquare, path: `/workspace/tasks/${user?.id}` },
+    { label: "Team", icon: Users, path: "/" },
+  ];
 
-  { label: "Workspace", icon: FolderKanban, path: `/logged` },
-  { label: "Tasks", icon: CheckSquare, path: `/workspace/tasks/${user?.id}` },
-  { label: "Team", icon: Users, path: `/` },
-];
+  const publicLinks = [
 
-  if (userLoading || !user) return null;
+  ];
+
+  if (userLoading) return null;
 
   return (
     <>
-      <header className="fixed top-0 left-0 w-full h-16 bg-[#202940] z-50 border-b border-[#4B4038]/50">
-        <div className="container mx-auto h-full px-4 sm:px-6">
-          <div className="flex items-center justify-between h-full gap-4">
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap');
 
-            {/* Logo */}
-            <div className="flex items-center gap-2 shrink-0">
-              <div className="w-8 h-8 rounded-md bg-gradient-to-br from-[#4B4038] to-[#9A8678] flex items-center justify-center">
-                <span className="text-[#CAAA98] font-bold text-sm">{name.charAt(0)}</span>
-              </div>
-              <span className="text-lg font-semibold text-[#CAAA98] hidden sm:block tracking-tight">Flow</span>
-            </div>
+        .hdr-root {
+          position: fixed;
+          top: 0; left: 0;
+          width: 100%;
+          height: 64px;
+          background-color: #202940;
+          z-index: 50;
+          border-bottom: 1px solid rgba(75,64,56,0.5);
+          font-family: 'DM Sans', sans-serif;
+        }
 
-            {/* Desktop Nav */}
-            <nav className="hidden md:flex items-center gap-1 flex-1 justify-center">
+        .hdr-inner {
+          max-width: 1200px;
+          margin: 0 auto;
+          height: 100%;
+          padding: 0 1.25rem;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 1rem;
+        }
+
+        /* Logo */
+        .hdr-logo {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          flex-shrink: 0;
+          cursor: pointer;
+          text-decoration: none;
+        }
+
+        .hdr-logo-icon {
+          width: 32px;
+          height: 32px;
+          border-radius: 8px;
+          background: linear-gradient(135deg, #4B4038, #9A8678);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-weight: 700;
+          font-size: 14px;
+          color: #CAAA98;
+          flex-shrink: 0;
+        }
+
+        .hdr-logo-name {
+          font-family: 'DM Serif Display', serif;
+          font-size: 20px;
+          color: #CAAA98;
+          letter-spacing: 0.02em;
+          line-height: 1;
+        }
+
+        /* Nav (logged in) */
+        .hdr-nav {
+          display: none;
+          align-items: center;
+          gap: 2px;
+          flex: 1;
+          justify-content: center;
+        }
+
+        @media (min-width: 768px) { .hdr-nav { display: flex; } }
+
+        .hdr-nav-btn {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          padding: 6px 12px;
+          border-radius: 7px;
+          font-size: 13.5px;
+          font-weight: 500;
+          font-family: 'DM Sans', sans-serif;
+          border: none;
+          cursor: pointer;
+          transition: background 0.15s, color 0.15s;
+          color: #9A8678;
+          background: transparent;
+          white-space: nowrap;
+        }
+
+        .hdr-nav-btn:hover {
+          color: #CAAA98;
+          background: rgba(75,64,56,0.2);
+        }
+
+        .hdr-nav-btn.active {
+          color: #CAAA98;
+          background: rgba(75,64,56,0.4);
+        }
+
+        /* Public nav links */
+        .hdr-pub-nav {
+          display: none;
+          align-items: center;
+          gap: 4px;
+          flex: 1;
+          justify-content: center;
+        }
+
+        @media (min-width: 768px) { .hdr-pub-nav { display: flex; } }
+
+        .hdr-pub-link {
+          padding: 6px 14px;
+          border-radius: 7px;
+          font-size: 13.5px;
+          font-weight: 500;
+          color: #9A8678;
+          background: none;
+          border: none;
+          cursor: pointer;
+          font-family: 'DM Sans', sans-serif;
+          transition: color 0.15s, background 0.15s;
+        }
+
+        .hdr-pub-link:hover {
+          color: #CAAA98;
+          background: rgba(75,64,56,0.2);
+        }
+
+        /* Right side */
+        .hdr-right {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          flex-shrink: 0;
+        }
+
+        /* Auth buttons (logged out) */
+        .hdr-auth-login {
+          padding: 6px 16px;
+          height: 36px;
+          border-radius: 8px;
+          font-size: 13.5px;
+          font-weight: 500;
+          font-family: 'DM Sans', sans-serif;
+          background: transparent;
+          border: 1.5px solid rgba(154,134,120,0.4);
+          color: #CAAA98;
+          cursor: pointer;
+          transition: border-color 0.15s, background 0.15s;
+          white-space: nowrap;
+        }
+
+        .hdr-auth-login:hover {
+          border-color: #9A8678;
+          background: rgba(154,134,120,0.1);
+        }
+
+        .hdr-auth-register {
+          padding: 6px 16px;
+          height: 36px;
+          border-radius: 8px;
+          font-size: 13.5px;
+          font-weight: 600;
+          font-family: 'DM Sans', sans-serif;
+          background: #F4E6DA;
+          border: none;
+          color: #202940;
+          cursor: pointer;
+          transition: background 0.15s, transform 0.1s;
+          white-space: nowrap;
+        }
+
+        .hdr-auth-register:hover { background: #e8d8cc; }
+        .hdr-auth-register:active { transform: scale(0.97); }
+
+        /* User dropdown */
+        .hdr-user-wrap { position: relative; }
+
+        .hdr-user-btn {
+          display: flex;
+          align-items: center;
+          gap: 7px;
+          padding: 4px 8px 4px 4px;
+          border-radius: 8px;
+          background: none;
+          border: none;
+          cursor: pointer;
+          transition: background 0.15s;
+        }
+
+        .hdr-user-btn:hover { background: rgba(75,64,56,0.3); }
+
+        .hdr-avatar {
+          width: 30px;
+          height: 30px;
+          border-radius: 50%;
+          background: #4B4038;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 11px;
+          font-weight: 700;
+          color: #CAAA98;
+          flex-shrink: 0;
+        }
+
+        .hdr-username {
+          font-size: 13.5px;
+          font-weight: 500;
+          color: #CAAA98;
+          display: none;
+        }
+
+        @media (min-width: 1024px) { .hdr-username { display: block; } }
+
+        .hdr-chevron {
+          color: #9A8678;
+          transition: transform 0.2s;
+          display: none;
+        }
+
+        @media (min-width: 1024px) { .hdr-chevron { display: block; } }
+        .hdr-chevron.open { transform: rotate(180deg); }
+
+        /* Dropdown menu */
+        .hdr-dropdown {
+          position: absolute;
+          right: 0;
+          top: calc(100% + 6px);
+          width: 176px;
+          background: #202940;
+          border: 1px solid rgba(75,64,56,0.5);
+          border-radius: 10px;
+          box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+          overflow: hidden;
+          animation: dropIn 0.15s ease;
+        }
+
+        @keyframes dropIn {
+          from { opacity: 0; transform: translateY(-6px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .hdr-dropdown-head {
+          padding: 10px 12px;
+          border-bottom: 1px solid rgba(75,64,56,0.3);
+        }
+
+        .hdr-dropdown-name {
+          font-size: 12px;
+          font-weight: 600;
+          color: #CAAA98;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+
+        .hdr-dropdown-email {
+          font-size: 11px;
+          color: #9A8678;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          margin-top: 1px;
+        }
+
+        .hdr-dropdown-link {
+          display: block;
+          padding: 8px 12px;
+          font-size: 13px;
+          color: #CAAA98;
+          text-decoration: none;
+          transition: background 0.12s;
+          cursor: pointer;
+          background: none;
+          border: none;
+          width: 100%;
+          text-align: left;
+          font-family: 'DM Sans', sans-serif;
+        }
+
+        .hdr-dropdown-link:hover { background: rgba(75,64,56,0.3); }
+
+        .hdr-dropdown-signout {
+          display: block;
+          width: 100%;
+          text-align: left;
+          padding: 8px 12px;
+          font-size: 13px;
+          font-family: 'DM Sans', sans-serif;
+          color: #e07a5f;
+          background: none;
+          border: none;
+          cursor: pointer;
+          transition: background 0.12s;
+        }
+
+        .hdr-dropdown-signout:hover { background: rgba(224,122,95,0.1); }
+
+        /* Mobile toggle */
+        .hdr-mobile-toggle {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 36px;
+          height: 36px;
+          border-radius: 8px;
+          background: none;
+          border: none;
+          color: #9A8678;
+          cursor: pointer;
+          transition: color 0.15s, background 0.15s;
+        }
+
+        .hdr-mobile-toggle:hover {
+          color: #CAAA98;
+          background: rgba(75,64,56,0.3);
+        }
+
+        @media (min-width: 768px) { .hdr-mobile-toggle { display: none; } }
+
+        /* Mobile drawer */
+        .hdr-mobile-drawer {
+          position: fixed;
+          top: 64px; left: 0;
+          width: 100%;
+          background: #202940;
+          border-bottom: 1px solid rgba(75,64,56,0.5);
+          z-index: 40;
+          animation: slideDown 0.2s ease;
+        }
+
+        @keyframes slideDown {
+          from { opacity: 0; transform: translateY(-8px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .hdr-mobile-nav {
+          padding: 8px 16px 12px;
+          display: flex;
+          flex-direction: column;
+          gap: 2px;
+        }
+
+        .hdr-mobile-link {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          padding: 10px 12px;
+          border-radius: 8px;
+          font-size: 14px;
+          font-weight: 500;
+          color: #9A8678;
+          background: none;
+          border: none;
+          cursor: pointer;
+          font-family: 'DM Sans', sans-serif;
+          text-align: left;
+          transition: background 0.15s, color 0.15s;
+        }
+
+        .hdr-mobile-link:hover, .hdr-mobile-link.active {
+          color: #CAAA98;
+          background: rgba(75,64,56,0.35);
+        }
+
+        .hdr-mobile-divider {
+          height: 1px;
+          background: rgba(75,64,56,0.3);
+          margin: 6px 12px;
+        }
+
+        .hdr-mobile-auth {
+          padding: 10px 16px 14px;
+          display: flex;
+          gap: 8px;
+        }
+
+        .hdr-mobile-auth-login {
+          flex: 1;
+          height: 40px;
+          border-radius: 8px;
+          background: transparent;
+          border: 1.5px solid rgba(154,134,120,0.4);
+          color: #CAAA98;
+          font-size: 14px;
+          font-weight: 500;
+          font-family: 'DM Sans', sans-serif;
+          cursor: pointer;
+        }
+
+        .hdr-mobile-auth-register {
+          flex: 1;
+          height: 40px;
+          border-radius: 8px;
+          background: #F4E6DA;
+          border: none;
+          color: #202940;
+          font-size: 14px;
+          font-weight: 600;
+          font-family: 'DM Sans', sans-serif;
+          cursor: pointer;
+        }
+
+        /* Separator dot */
+        .hdr-sep {
+          width: 3px; height: 3px;
+          border-radius: 50%;
+          background: rgba(154,134,120,0.4);
+          display: none;
+        }
+        @media (min-width: 768px) { .hdr-sep { display: block; } }
+      `}</style>
+
+      <header className="hdr-root">
+        <div className="hdr-inner">
+
+          {/* Logo */}
+          <div className="hdr-logo" onClick={() => navigate("/")}>
+            <div className="hdr-logo-icon">F</div>
+            <span className="hdr-logo-name">Flow</span>
+          </div>
+
+          {/* Nav — logged in */}
+          {isLoggedIn && (
+            <nav className="hdr-nav">
               {navLinks.map(({ label, icon: Icon, path }) => (
                 <button
                   key={label}
                   onClick={() => navigate(path)}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-colors
-                    ${
-                      isActive(path)
-                        ? "bg-[#4B4038]/40 text-[#CAAA98]"
-                        : "text-[#9A8678] hover:text-[#CAAA98] hover:bg-[#4B4038]/20"
-                    }`}
+                  className={`hdr-nav-btn ${isActive(path) ? "active" : ""}`}
                 >
                   <Icon size={15} />
                   {label}
                 </button>
               ))}
             </nav>
+          )}
 
-            {/* Right controls */}
-            <div className="flex items-center gap-2 shrink-0">
-
-              <Notification />
-
-              {/* User dropdown */}
-              <div className="relative">
+          {/* Nav — logged out */}
+          {!isLoggedIn && (
+            <nav className="hdr-pub-nav">
+              {publicLinks.map(({ label, path }) => (
                 <button
-                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                  className="flex items-center gap-2 pl-1 pr-2 py-1 rounded-md hover:bg-[#4B4038]/30 transition-colors focus:outline-none"
+                  key={label}
+                  className="hdr-pub-link"
+                  onClick={() => navigate(path)}
                 >
-                  <div className="w-7 h-7 rounded-full bg-[#4B4038] flex items-center justify-center text-[#CAAA98] text-xs font-semibold">
-                    {initials}
-                  </div>
-                  <span className="hidden lg:block text-sm font-medium text-[#CAAA98]">{name}</span>
-                  <ChevronDown
-                    size={14}
-                    className={`hidden lg:block text-[#9A8678] transition-transform duration-200 ${isDropdownOpen ? "rotate-180" : ""}`}
-                  />
+                  {label}
                 </button>
+              ))}
+            </nav>
+          )}
 
-                {isDropdownOpen && (
-                  <div className="absolute right-0 mt-1.5 w-44 bg-[#202940] rounded-lg shadow-xl border border-[#4B4038]/50 overflow-hidden">
-                    <div className="px-3 py-2 border-b border-[#4B4038]/30">
-                      <p className="text-xs font-medium text-[#CAAA98] truncate">{name}</p>
-                      <p className="text-xs text-[#9A8678] truncate">{user?.info?.email}</p>
+          {/* Right side */}
+          <div className="hdr-right">
+
+            {isLoggedIn ? (
+              <>
+                <Notification />
+
+                <div className="hdr-user-wrap">
+                  <button
+                    className="hdr-user-btn"
+                    onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                  >
+                    <div className="hdr-avatar">{initials}</div>
+                    <span className="hdr-username">{name}</span>
+                    <ChevronDown
+                      size={14}
+                      className={`hdr-chevron ${isDropdownOpen ? "open" : ""}`}
+                    />
+                  </button>
+
+                  {isDropdownOpen && (
+                    <div className="hdr-dropdown">
+                      <div className="hdr-dropdown-head">
+                        <p className="hdr-dropdown-name">{name}</p>
+                        <p className="hdr-dropdown-email">{user?.info?.email || user?.email}</p>
+                      </div>
+                      <button className="hdr-dropdown-link" onClick={() => { navigate("/profile"); setIsDropdownOpen(false); }}>
+                        Your Profile
+                      </button>
+                      <button className="hdr-dropdown-link" onClick={() => { navigate("/settings"); setIsDropdownOpen(false); }}>
+                        Settings
+                      </button>
+                      <button className="hdr-dropdown-signout" onClick={handleLogout}>
+                        Sign out
+                      </button>
                     </div>
-                    {[["Your Profile", "#"], ["Settings", "#"]].map(([label, href]) => (
-                      <a
-                        key={label}
-                        href={href}
-                        className="block px-3 py-2 text-sm text-[#CAAA98] hover:bg-[#4B4038]/30 transition-colors"
-                      >
-                        {label}
-                      </a>
-                    ))}
-                    <button
-                      onClick={handleLogout}
-                      className="w-full text-left block px-3 py-2 text-sm text-red-400 hover:bg-red-500/10 transition-colors"
-                    >
-                      Sign out
-                    </button>
-                  </div>
-                )}
-              </div>
+                  )}
+                </div>
+              </>
+            ) : (
+              <>
+                <button className="hdr-auth-login" onClick={() => navigate("/login")}>
+                  Sign in
+                </button>
+                <button className="hdr-auth-register" onClick={() => navigate("/register")}>
+                  Get started
+                </button>
+              </>
+            )}
 
-              {/* Mobile menu toggle */}
-              <button
-                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="md:hidden p-2 rounded-md text-[#9A8678] hover:text-[#CAAA98] hover:bg-[#4B4038]/30 transition-colors"
-              >
-                <Menu size={20} />
-              </button>
-            </div>
+            {/* Mobile toggle */}
+            <button
+              className="hdr-mobile-toggle"
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              aria-label="Toggle menu"
+            >
+              {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+            </button>
           </div>
         </div>
       </header>
 
-      {/* Mobile Nav */}
+      {/* Mobile drawer */}
       {isMobileMenuOpen && (
-        <div className="fixed top-16 left-0 w-full bg-[#202940] border-b border-[#4B4038]/50 z-40 md:hidden">
-          <nav className="container mx-auto px-4 py-2 flex flex-col gap-1">
-            {navLinks.map(({ label, icon: Icon, path }) => (
+        <div className="hdr-mobile-drawer">
+          {isLoggedIn ? (
+            <nav className="hdr-mobile-nav">
+              {navLinks.map(({ label, icon: Icon, path }) => (
+                <button
+                  key={label}
+                  className={`hdr-mobile-link ${isActive(path) ? "active" : ""}`}
+                  onClick={() => { navigate(path); setIsMobileMenuOpen(false); }}
+                >
+                  <Icon size={17} />
+                  {label}
+                </button>
+              ))}
+              <div className="hdr-mobile-divider" />
               <button
-                key={label}
-                onClick={() => {
-                  navigate(path);
-                  setIsMobileMenuOpen(false);
-                }}
-                className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors text-left
-                  ${
-                    isActive(path)
-                      ? "bg-[#4B4038]/40 text-[#CAAA98]"
-                      : "text-[#9A8678] hover:text-[#CAAA98] hover:bg-[#4B4038]/20"
-                  }`}
+                className="hdr-mobile-link"
+                style={{ color: "#e07a5f" }}
+                onClick={handleLogout}
               >
-                <Icon size={16} />
-                {label}
+                Sign out
               </button>
-            ))}
-          </nav>
+            </nav>
+          ) : (
+            <>
+              <nav className="hdr-mobile-nav">
+                {publicLinks.map(({ label, path }) => (
+                  <button
+                    key={label}
+                    className="hdr-mobile-link"
+                    onClick={() => { navigate(path); setIsMobileMenuOpen(false); }}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </nav>
+              <div className="hdr-mobile-auth">
+                <button
+                  className="hdr-mobile-auth-login"
+                  onClick={() => { navigate("/login"); setIsMobileMenuOpen(false); }}
+                >
+                  Sign in
+                </button>
+                <button
+                  className="hdr-mobile-auth-register"
+                  onClick={() => { navigate("/register"); setIsMobileMenuOpen(false); }}
+                >
+                  Get started
+                </button>
+              </div>
+            </>
+          )}
         </div>
       )}
     </>

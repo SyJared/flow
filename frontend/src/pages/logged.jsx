@@ -212,7 +212,7 @@ function LoggedIn() {
   );
 
   return (
-    <div className="min-h-screen bg-[#e8e4e0]">
+    <div className="min-h-screen bg-[#F7F5F3] pt-9 pb-12">
       <div className="max-w-5xl mx-auto px-6 py-8">
 
         {/* Greeting */}

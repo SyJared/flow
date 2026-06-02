@@ -162,7 +162,7 @@ function WorkspacePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen bg-gray-50 pt-15 pb-12">
 
       {/* Header */}
       <div className="bg-gray-900 rounded-xl px-6 py-4 mb-6 flex items-center justify-between shadow-sm">
