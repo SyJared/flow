@@ -1,16 +1,113 @@
-# React + Vite
+# Flow
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+An online web-based workspace built for any kind of work. Flow lets teams organize their work across multiple workspaces and task boards, where each task can be assigned to a specific team member — keeping everyone aligned and projects moving.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Tech Stack
 
-## React Compiler
+**Frontend**
+- React
+- React Router
+- CSS / Tailwind CSS
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+**Backend**
+- Node.js
+- Express.js
+- REST APIs
+- JWT Authentication
 
-## Expanding the ESLint configuration
+**Database**
+- MySQL
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+**Security & Validation**
+- Zod (request validation)
+- bcrypt (password hashing)
+- Middleware
+- Role-Based Access Control
+
+**Tools**
+- Git & GitHub
+- Docker & Docker Compose
+- Postman
+- VS Code
+
+---
+
+## Features
+
+- 🗂️ **Multiple Workspaces** — Create separate workspaces for different teams or projects
+- 📌 **Task Boards** — Organize tasks visually across boards within each workspace
+- 👤 **Task Assignment** — Assign tasks to specific team members with clear ownership
+- 🔐 **JWT Authentication** — Secure login and protected routes
+- 🛡️ **Role-Based Access** — Different permissions for workspace owners and members
+- ✅ **Zod Validation** — All API inputs are validated server-side
+- 🔒 **bcrypt Password Hashing** — User passwords are securely hashed before storage
+
+---
+
+## Getting Started
+
+### Prerequisites
+
+- [Docker](https://www.docker.com/get-started) & Docker Compose
+
+### Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/your-username/flow.git
+   cd flow
+   ```
+
+2. **Set up environment variables**
+
+   Create a `.env` file in the root folder:
+   ```env
+   DB_HOST=db
+   DB_USER=root
+   DB_PASSWORD=your_password
+   DB_NAME=flow
+   JWT_SECRET=your_jwt_secret
+   ```
+
+3. **Start the app**
+   ```bash
+   docker compose up
+   ```
+
+   This starts the frontend, backend, and database in one command. No separate installs needed.
+
+4. Open `http://localhost:5173` in your browser.
+
+### Stopping the app
+```bash
+docker compose down
+```
+
+---
+
+## Project Structure
+
+```
+flow/
+├── client/          # React frontend
+│   ├── frontend/
+│   │   ├── components/
+│   │   ├── pages/
+│   │   └── App.jsx
+├── backend/          # Express backend
+│   ├── routes/
+│   ├── controllers/
+│   ├── middleware/
+│   └── index.js
+├── docker-compose.yml
+└── README.md
+```
+
+---
+
+## Author
+
+**Symmon Jared Gagaring**
+- GitHub: [@ySyJared](https://github.com/SyJared)
