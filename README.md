@@ -56,7 +56,7 @@ An online web-based workspace built for any kind of work. Flow lets teams organi
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/your-username/flow.git
+   git clone https://github.com/SyJared/flow.git
    cd flow
    ```
 
