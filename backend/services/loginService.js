@@ -3,43 +3,43 @@ const bcrypt = require("bcrypt")
 const jwt = require("jsonwebtoken")
 const appError = require("../utils/appError")
 
-const loginUser = async (email, password) => {
-  return new Promise((resolve, reject) => {
+  const loginUser = async (email, password) => {
+    return new Promise((resolve, reject) => {
 
-    const sql = "SELECT * FROM users WHERE email = ?";
+      const sql = "SELECT * FROM users WHERE email = ?";
 
-    db.query(sql, [email], async (err, results) => {
-      if (err) return reject(err);
+      db.query(sql, [email], async (err, results) => {
+        if (err) return reject(err);
 
-      if (results.length === 0) {
-        return reject(new Error("User not found"));
-      }
+        if (results.length === 0) {
+          return reject(new Error("User not found"));
+        }
 
-      const user = results[0];
+        const user = results[0];
 
-      const isMatch = await bcrypt.compare(
-        password,
-        user.password
-      );
+        const isMatch = await bcrypt.compare(
+          password,
+          user.password
+        );
 
-      if (!isMatch) {
-        return reject(new Error("Invalid credentials"));
-      }
+        if (!isMatch) {
+          return reject(new Error("Invalid credentials"));
+        }
 
-      const token = jwt.sign(
-        {
-          id: user.id,
-          email: user.email,
-          name: user.name
-        },
-        process.env.JWT_SECRET,
-        { expiresIn: "1h" }
-      );
+        const token = jwt.sign(
+          {
+            id: user.id,
+            email: user.email,
+            name: user.name
+          },
+          process.env.JWT_SECRET,
+          { expiresIn: "1h" }
+        );
 
-      resolve({ user, token });
+        resolve({ user, token });
+      });
     });
-  });
-};
+  };
 
 
 const registerUser = async (name, email, password) => {

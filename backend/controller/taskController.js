@@ -1,6 +1,9 @@
+
+const { success } = require("zod");
 const taskService = require("../services/taskService");
 
 const appError = require("../utils/appError");
+const { response } = require("express");
 
 const createTask = async (req,res,next) =>{
   const { workspaceId, title, description, priority, dueDate, assignedTo } = req.body;
@@ -61,4 +64,53 @@ const getAllTaskByUserId = async (req, res, next) => {
     next(err);
   }
 }
-module.exports = { createTask, getTasksByWorkspaceId , getAllTaskByUserId};
+
+const bestMember = async (req, res, next) => {
+  try {
+    console.log("controller params:", req.params);
+
+    const { id } = req.params;
+
+    // 1. get data from DB
+    const tasksInfo = await taskService.bestMember(id);
+
+    if (!tasksInfo || tasksInfo.length === 0) {
+      return res.status(200).json({
+        success: true,
+        message: "No completed tasks yet",
+      });
+    }
+
+    // 2. prepare features for ML
+    const features = tasksInfo.map(task => ({
+      assigned_to: task.assigned_to,
+      priority: task.priority,
+      planned_days: task.planned_days,
+      total_hours: task.total_hours,
+    }));
+
+    // 3. call Python ML API
+    const response = await fetch("http://ml-service:5001/predict-members", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ features }),
+    });
+    if (!response.ok) {
+  throw new Error(`ML service error: ${response.status}`);
+}
+    const data = await response.json();
+console.log("ML response:", data);
+    // 4. return result to frontend
+    return res.json({
+      success: true,
+      recommendation: data.ranking,
+      message: "Recommendation retrievedsss",
+    });
+
+  } catch (err) {
+    next(err);
+  }
+};
+module.exports = { createTask, getTasksByWorkspaceId , getAllTaskByUserId, bestMember};

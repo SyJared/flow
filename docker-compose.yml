@@ -43,6 +43,15 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
+      
+  ml-service:
+    build: ./ml-service
+    ports:
+      - "5001:5001"
+    volumes:
+      - ./ml-service:/app  # ← mounts your code live
+    environment:
+      FLASK_ENV: development  # ← enables auto-reload
 
 volumes:
   mysql_data:

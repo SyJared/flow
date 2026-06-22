@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { getWorkspaceById } from "../api/getWorkspaceById";
 import { searchName } from "../api/searchName";
-import { assignMember, editMember } from "../api/assignMember";
+import { assignMember, bestMember, editMember } from "../api/assignMember";
 import { getWorkspaceMembers } from "../api/getWorkspaceById";
 import { createTask } from "../api/createTask";
 import { getTask } from "../api/getTask";
@@ -33,6 +33,8 @@ function WorkspacePage() {
   const [tasks, setTasks] = useState([]);
   const [tasksMessage, setTasksMessage] = useState('');
   const [taskErrors, setTaskErrors] = useState([]);
+
+  const [recommended, setRecommended] = useState([])
 
   
 
@@ -100,6 +102,7 @@ function WorkspacePage() {
   const handleSearch = async (e) => {
     e.preventDefault();
     try {
+      
       const res = await searchName(nameParam);
       setSearchResults(res.users);
       setSearchMessage(res.message);
@@ -107,6 +110,20 @@ function WorkspacePage() {
       console.error(err);
     }
   };
+
+ const handleBestMember = async(e)=>{
+  e.preventDefault();
+  try {
+    const res = await bestMember(id)
+    if(res.success){
+      setRecommended(res.ranking)
+    }
+    console.log(recommended)
+    console.log("res",res)
+  } catch (err) {
+    console.log(err)
+  }
+ }
 
   const handleAssign = async () => {
     try {
@@ -282,7 +299,7 @@ function WorkspacePage() {
             <form onSubmit={handleSearch}>
               <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">Search by name</label>
               <div className="flex">
-                <input
+                <input 
                   type="text"
                   placeholder="Enter a user name…"
                   value={nameParam}
@@ -401,11 +418,18 @@ function WorkspacePage() {
                   value={taskInfo.assignedTo}
                   onChange={(e) => setTaskInfo({ ...taskInfo, assignedTo: e.target.value })}
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 bg-white outline-none focus:border-gray-400"
-                >
+                > 
                   {members.map((m) => (
                     <option key={m.id} value={m.id}>{m.name} ({m.role})</option>
                   ))}
                 </select>
+                <button
+    type="button"
+    onClick={handleBestMember}
+    className="px-3 py-2 bg-blue-600 text-white rounded-lg"
+  >
+    AI Recommend
+  </button>
               </div>
               <button type="submit" className="w-full bg-gray-900 text-amber-100 text-sm font-semibold py-2.5 rounded-lg hover:bg-gray-800 transition-colors shadow-sm">
                 Create Task

@@ -25,3 +25,15 @@ export const editMember = async ({id, role, memberId}) =>{
   })
   return res.json();
 }
+
+export const bestMember = async(id) =>{
+  const token = localStorage.getItem('token');
+  const res = await fetch(`http://localhost:5000/api/tasks/best-member/${id}`,{
+    method: "GET",
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    }
+  })
+  return res.json();
+}

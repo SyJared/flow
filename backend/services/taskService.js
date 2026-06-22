@@ -114,4 +114,36 @@ const getAllTaskByUserId = async (userId) => {
   })
 }
 
-module.exports = { createTask, getTaskByWorkspaceId, getAllTaskByUserId };
+const bestMember = async(id)=>{
+  return new Promise((resolve, reject)=>{
+    const sql =`
+   SELECT
+    t.id,
+    t.title,
+    t.priority,
+    t.assigned_to,
+    DATEDIFF(t.due_date, t.created_at) AS planned_days,
+    COALESCE(SUM(u.hours_spent), 0) AS total_hours
+FROM tasks t
+LEFT JOIN task_updates u
+    ON u.task_id = t.id
+WHERE t.workspace_id = ?
+    AND t.status = 'done'
+GROUP BY
+    t.id,
+    t.title,
+    t.priority,
+    t.assigned_to,
+    planned_days
+ORDER BY t.id;
+`;
+    db.query(sql, [id], (err,result)=>{
+      console.log("service workspaceId:", id);
+      if(err){
+        return reject(err)
+      }
+      resolve(result)
+    })
+  })
+}
+module.exports = { createTask, getTaskByWorkspaceId, getAllTaskByUserId, bestMember};
