@@ -1,6 +1,7 @@
 
 const { success } = require("zod");
 const taskService = require("../services/taskService");
+const exportTrainingData = require('../utils/export-training-data')
 
 const appError = require("../utils/appError");
 const { response } = require("express");
@@ -84,9 +85,10 @@ const bestMember = async (req, res, next) => {
     // 2. prepare features for ML
     const features = tasksInfo.map(task => ({
       assigned_to: task.assigned_to,
+      task_id: task.task_id,       // ← from t.id AS task_id
       priority: task.priority,
-      planned_days: task.planned_days,
-      total_hours: task.total_hours,
+      hours_spent: task.hours_spent, // ← from u.hours_spent
+      progress: task.progress,  
     }));
 
     // 3. call Python ML API
@@ -100,6 +102,7 @@ const bestMember = async (req, res, next) => {
     if (!response.ok) {
   throw new Error(`ML service error: ${response.status}`);
 }
+
     const data = await response.json();
 console.log("ML response:", data);
     // 4. return result to frontend
