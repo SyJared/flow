@@ -116,9 +116,9 @@ function WorkspacePage() {
   try {
     const res = await bestMember(id)
     if(res.success){
-      setRecommended(res.ranking)
+      setRecommended(res.recommendation)
     }
-    console.log(recommended)
+    console.log("reccoo" ,recommended)
     console.log("res",res)
   } catch (err) {
     console.log(err)
@@ -177,6 +177,33 @@ function WorkspacePage() {
       </div>
     );
   }
+  const aggregated = (() => {
+  if (recommended.length === 0) return [];
+  const memberMap = {};
+  recommended.forEach(({ assigned_to, predicted_days_late }) => {
+    if (!memberMap[assigned_to]) {
+      memberMap[assigned_to] = { total: 0, count: 0 };
+    }
+    memberMap[assigned_to].total += predicted_days_late;
+    memberMap[assigned_to].count += 1;
+  });
+  return Object.entries(memberMap)
+    .map(([memberId, { total, count }]) => ({
+      id: Number(memberId),
+      avg: total / count,
+    }))
+    .sort((a, b) => a.avg - b.avg);
+})();
+
+const getLabel = (days) => {
+  if (days <= -7) return { text: "Likely to finish very early", color: "text-green-600" };
+  if (days <= -3) return { text: "Likely to finish early", color: "text-green-500" };
+  if (days <= -0.5) return { text: "Likely to finish slightly early", color: "text-emerald-500" };
+  if (days <= 0.5) return { text: "Likely to finish on time", color: "text-blue-500" };
+  if (days <= 3) return { text: "Slight risk of delay", color: "text-yellow-500" };
+  if (days <= 7) return { text: "Risk of delay", color: "text-orange-500" };
+  return { text: "High risk of delay", color: "text-red-500" };
+};
 
   return (
     <div className="min-h-screen bg-gray-50 pt-15 pb-12">
@@ -424,12 +451,43 @@ function WorkspacePage() {
                   ))}
                 </select>
                 <button
-    type="button"
-    onClick={handleBestMember}
-    className="px-3 py-2 bg-blue-600 text-white rounded-lg"
-  >
-    AI Recommend
-  </button>
+  type="button"
+  onClick={handleBestMember}
+  className="mt-2 w-full px-3 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
+>
+  AI Recommend
+</button>
+
+{aggregated.length > 0 && (
+  <div className="mt-2 rounded-lg border border-gray-200 overflow-hidden">
+    <div className="px-3 py-2 bg-gray-50 border-b border-gray-200">
+      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">AI Recommendation</p>
+    </div>
+    <div className="divide-y divide-gray-100">
+      {aggregated.map(({ id: memberId, avg }, index) => {
+        const member = members.find(m => m.id === memberId);
+        const { text, color } = getLabel(avg);
+        return (
+          <div
+            key={memberId}
+            onClick={() => setTaskInfo({ ...taskInfo, assignedTo: memberId })}
+            className={`flex items-center justify-between px-3 py-2.5 cursor-pointer hover:bg-gray-50 transition-colors ${taskInfo.assignedTo === memberId ? "bg-blue-50" : ""}`}
+          >
+            <div className="flex items-center gap-2">
+              {index === 0 && (
+                <span className="text-xs bg-blue-100 text-blue-700 font-semibold px-1.5 py-0.5 rounded">Best</span>
+              )}
+              <span className="text-sm font-medium text-gray-800">
+                {member ? member.name : `Member ${memberId}`}
+              </span>
+            </div>
+            <span className={`text-xs font-medium ${color}`}>{text}</span>
+          </div>
+        );
+      })}
+    </div>
+  </div>
+)}
               </div>
               <button type="submit" className="w-full bg-gray-900 text-amber-100 text-sm font-semibold py-2.5 rounded-lg hover:bg-gray-800 transition-colors shadow-sm">
                 Create Task

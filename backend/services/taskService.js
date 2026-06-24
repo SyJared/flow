@@ -117,7 +117,31 @@ const getAllTaskByUserId = async (userId) => {
 const bestMember = async(id)=>{
   return new Promise((resolve, reject)=>{
     const sql =`
-   SELECT t.workspace_id, t.assigned_to, t.priority, t.id AS task_id, u.hours_spent, u.progress FROM tasks t JOIN task_updates u ON u.task_id = t.id WHERE t.status = 'done' AND t.workspace_id = ?;
+   SELECT
+    t.id AS task_id,
+    t.assigned_to,
+    t.priority,
+
+    DATEDIFF(t.due_date, t.created_at) AS planned_days,
+    SUM(COALESCE(u.hours_spent,0)) AS total_hours,
+    COUNT(u.id) AS num_updates,
+
+    t.days_late,
+    t.on_time_completion
+
+FROM tasks t
+JOIN task_updates u
+    ON u.task_id = t.id
+
+WHERE t.status = 'done'
+AND t.workspace_id = ?
+
+GROUP BY
+    t.id,
+    t.assigned_to,
+    t.priority,
+    t.days_late,
+    t.on_time_completion;
 `;
     db.query(sql, [id], (err,result)=>{
       console.log("service workspaceId:", id);

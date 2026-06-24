@@ -87,8 +87,11 @@ const bestMember = async (req, res, next) => {
       assigned_to: task.assigned_to,
       task_id: task.task_id,       // ← from t.id AS task_id
       priority: task.priority,
-      hours_spent: task.hours_spent, // ← from u.hours_spent
-      progress: task.progress,  
+      total_hours: task.total_hours, // ← from u.hours_spent
+      planned_days: task.planned_days, 
+      num_updates: task.num_updates ,
+      days_late: task.days_late,
+      on_time_completion: task.on_time_completion
     }));
 
     // 3. call Python ML API
