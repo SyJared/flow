@@ -119,4 +119,22 @@ console.log("ML response:", data);
     next(err);
   }
 };
-module.exports = { createTask, getTasksByWorkspaceId , getAllTaskByUserId, bestMember};
+const getPastDue = async (req,res,next)=>{
+  const userId = req.user.id;
+  try {
+    const response = await taskService.getPastDueCount(userId)
+    if(!response){
+      return res.status(400).json({
+        success: false,
+        message: "failed to retrieve data"
+      })
+    }
+    return res.json({
+      success: true,
+      results: response
+    })
+  } catch (err) {
+    next(err)
+  }
+}
+module.exports = { createTask, getTasksByWorkspaceId , getAllTaskByUserId, bestMember, getPastDue};

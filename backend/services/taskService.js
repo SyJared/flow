@@ -152,4 +152,45 @@ GROUP BY
     })
   })
 }
-module.exports = { createTask, getTaskByWorkspaceId, getAllTaskByUserId, bestMember};
+
+const getPastDueCount = async (userId) => {
+  return new Promise((resolve, reject) => {
+    const sql1 = `
+      SELECT COUNT(*) AS completed_past_due
+      FROM tasks
+      WHERE assigned_to = ?
+        AND status = 'done'
+        AND completed_date > due_date;
+    `;
+
+    const sql2 = `
+      SELECT
+          id,
+          title,
+          status,
+          due_date,
+          DATEDIFF(due_date, CURDATE()) AS days_remaining
+      FROM tasks
+      WHERE assigned_to = ?
+        AND status IN ('todo', 'doing')
+      ORDER BY due_date ASC
+      LIMIT 1;
+    `;
+
+    db.query(sql1, [userId], (err, pastDueResult) => {
+      if (err) return reject(err);
+
+      db.query(sql2, [userId], (err, urgentTaskResult) => {
+        if (err) return reject(err);
+
+        resolve({
+          completedPastDue: pastDueResult[0].completed_past_due,
+          urgentTask: urgentTaskResult.length > 0
+            ? urgentTaskResult[0]
+            : null
+        });
+      });
+    });
+  });
+};
+module.exports = { createTask, getTaskByWorkspaceId, getAllTaskByUserId, bestMember, getPastDueCount};

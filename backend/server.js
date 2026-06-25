@@ -89,6 +89,9 @@ app.use("/api/tasks", taskRoute);
 
 
 
+const aiRouter = require('./routes/aiRoute');
+app.use('/api/ai', aiRouter);
+
 
 // mark as doing
 app.post("/api/auth/status-doing/:id", authMiddleware, assignedMiddleware, (req, res) => {

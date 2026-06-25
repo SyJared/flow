@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const authMiddleware = require("../middleware/authMiddleware");
 const roleMiddleware = require("../middleware/roleMiddleware");
-const {createTask, getTasksByWorkspaceId, getAllTaskByUserId, bestMember} = require("../controller/taskController");
+const {createTask, getTasksByWorkspaceId, getAllTaskByUserId, bestMember, getPastDue} = require("../controller/taskController");
 
 const validate = require("../middleware/validationMiddleware");
 const {taskSchema} = require("../validations/taskSchema");
@@ -11,5 +11,5 @@ router.post("/create-task/:id", authMiddleware, roleMiddleware, validate(taskSch
 router.get("/get-tasks/:workspaceId", authMiddleware, getTasksByWorkspaceId);
 router.get("/all-task/:userId", authMiddleware, getAllTaskByUserId);
 router.get("/best-member/:id", authMiddleware, bestMember);
-
+router.get("/past-due", authMiddleware, getPastDue)
 module.exports = router;

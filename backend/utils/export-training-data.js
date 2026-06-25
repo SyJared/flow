@@ -32,4 +32,3 @@ async function exportTrainingData() {
 
 module.exports = exportTrainingData;
 
-exportTrainingData().catch(console.error);

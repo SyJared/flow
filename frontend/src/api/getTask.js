@@ -45,3 +45,15 @@ export const getRecentActivity = async () => {
 
   return res.json();
 };
+
+export const getPastDue = async()=>{
+  const token = localStorage.getItem("token");
+
+  const res = await fetch(`http://localhost:5000/api/tasks/past-due`,{
+    method: 'GET',
+    headers:{
+      Authorization: `Bearer ${token}`
+    }
+  })
+  return res.json()
+}

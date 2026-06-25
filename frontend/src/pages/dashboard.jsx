@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../features/auth/authContext";
-import { getAllTaskByUserId, getRecentActivity } from "../api/getTask";
+import { getAllTaskByUserId, getPastDue, getRecentActivity } from "../api/getTask";
 import { getWorkspaces } from "../api/createWorkspace";
 
 // ── helpers ──────────────────────────────────────────────────────────────────
@@ -97,6 +97,11 @@ function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [recentActivity, setRecentActivity] = useState([]);
 
+  const [pastDue, setPastDue] = useState({ completedPastDue: 0, urgentTask: null })
+
+  const [summary, setSummary] = useState("");
+  const [loadingSummary, setLoadingSummary] = useState(false)
+
   useEffect(() => {
     if (userLoading) return;
     if (!user?.id) navigate("/login", { replace: true });
@@ -106,16 +111,19 @@ function DashboardPage() {
     if (!user?.id) return;
     const load = async () => {
       try {
-        const [taskData, wsData, activityData] = await Promise.all([
+        const [taskData, wsData, activityData, past] = await Promise.all([
           getAllTaskByUserId(user.id),
           getWorkspaces(),
           getRecentActivity(),
+          getPastDue()
         ]);
         setTasks(Array.isArray(taskData.results) ? taskData.results : []);
         setWorkspaces(Array.isArray(wsData.workspaces) ? wsData.workspaces : []);
         setRecentActivity(activityData.results || []);
+        setPastDue(past?.results ?? { completedPastDue: 0, urgentTask: null })
+
       } catch (err) {
-        console.error("Dashboard load error:", err);
+        console.error("Dashboard load error:", err);  
       } finally {
         setLoading(false);
       }
@@ -129,6 +137,44 @@ function DashboardPage() {
   const doingCount = tasks.filter((t) => t.status === "doing").length;
   const doneCount  = tasks.filter((t) => t.status === "done").length;
   const overdueCount = tasks.filter((t) => isOverdue(t.due_date, t.status)).length;
+
+
+const prompt = `
+  Generate a concise sprint summary.
+
+  Total Tasks: ${total}
+  Done: ${doneCount}
+  Doing: ${doingCount}
+  Todo: ${todoCount}
+  Completed Past Due: ${pastDue.completedPastDue}
+
+  Most Urgent Task: ${pastDue.urgentTask?.title ?? "None"}
+  Days Remaining: ${pastDue.urgentTask?.days_remaining ?? "N/A"}
+  Status: ${pastDue.urgentTask?.status ?? "N/A"}
+
+  Keep the summary under 100 words.
+`;
+const generateSummary = async (prompt) => {
+  const response = await fetch("/api/ai/summary", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ prompt })
+  });
+  const data = await response.json();
+  return data.summary;
+};
+
+const handleSummary = async () => {
+  setLoadingSummary(true);
+  try {
+    const result = await generateSummary(prompt); // your prompt string
+    setSummary(result);
+  } catch (err) {
+    console.error(err);
+  } finally {
+    setLoadingSummary(false);
+  }
+};
 
   // active tasks (not done), sorted: overdue first, then by due date
   const activeTasks = tasks
@@ -157,6 +203,8 @@ function DashboardPage() {
   // workspace task counts
   const wsTaskCount = (wsName) =>
     tasks.filter((t) => t.workspace_name === wsName).length;
+
+  
 
   if (loading) {
     return (
@@ -471,7 +519,10 @@ console.log(tasks)
             <StatCard label="Done"        value={doneCount}   sub="completed"     valueColor="#3B6D11" />
             <StatCard label="Overdue"     value={overdueCount} sub="past due date" valueColor={overdueCount > 0 ? "#A32D2D" : undefined} />
           </div>
-
+        <button onClick={handleSummary} disabled={loadingSummary}>
+  {loadingSummary ? "Generating..." : "Generate Summary"}
+</button>
+{summary && <p>{summary}</p>}
           {/* Row 1: Active tasks + Workspaces */}
           <div className="two-col">
             <SectionCard title="Active tasks" badge={activeTasks.length}>
@@ -581,4 +632,4 @@ console.log(tasks)
   );
 }
 
-export default DashboardPage;
+export default DashboardPage
