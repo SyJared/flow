@@ -35,5 +35,7 @@ export const bestMember = async(id) =>{
       'Authorization': `Bearer ${token}`
     }
   })
-  return res.json();
+  const result = await res.json();
+  if (!res.ok) throw new Error(result.message || "Recommendation request failed");
+  return result;
 }

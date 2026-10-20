@@ -102,10 +102,10 @@ function DashboardPage() {
         body: JSON.stringify({ prompt }),
       });
       const data = await response.json();
-      if (!response.ok || !data.success || !data.summary) throw new Error(data.message || "The summary service is unavailable.");
+      if (!response.ok || !data.success || !data.summary) throw new Error("services not yet deployed");
       setSummary(data.summary);
-    } catch (error) {
-      setSummaryError(error.message || "The summary service is unavailable.");
+    } catch {
+      setSummaryError("services not yet deployed");
     } finally {
       setLoadingSummary(false);
     }

@@ -135,13 +135,16 @@ function WorkspacePage() {
   try {
     const res = await bestMember(id)
     if(res.success){
-      setRecommended(res.recommendation)
-      if (!res.recommendation?.length) setRecommendationMessage('There is not enough completed task history to make a recommendation yet.');
+      const recommendation = Array.isArray(res.recommendation) ? res.recommendation : [];
+      setRecommended(recommendation);
+      if (!recommendation.length) setRecommendationMessage('There is not enough completed task history to make a recommendation yet.');
     } else {
-      setRecommendationMessage(res.message || 'Could not create a recommendation.');
+      setRecommended([]);
+      setRecommendationMessage('services not yet deployed');
     }
-  } catch (err) {
-    setRecommendationMessage(err.message || 'Could not create a recommendation.');
+  } catch {
+    setRecommended([]);
+    setRecommendationMessage('services not yet deployed');
   }
  }
 

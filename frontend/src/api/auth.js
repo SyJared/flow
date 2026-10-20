@@ -1,4 +1,4 @@
-export const API_ORIGIN = (import.meta.env.VITE_API_ORIGIN || "http://localhost:5000").replace(/\/$/, "");
+export const API_ORIGIN = (import.meta.env.VITE_API_ORIGIN || "https://flow-e2m7.onrender.com").replace(/\/$/, "");
 export const API_BASE = `${API_ORIGIN}/api`;
 export const BASE_URL = `${API_BASE}/auth`;
 
