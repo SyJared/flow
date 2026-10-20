@@ -1,8 +1,9 @@
 const taskUpdateService = require('../services/taskUpdateService');
 const updateTask = async (req, res, next) => {
-  const { id, taskId, workspaceId, message, progress } = req.body;
+  const { taskId, workspaceId, message, progress } = req.body;
+  const userId = req.user.id;
   try {
-    const taskUpdate = await taskUpdateService.updateTask(id, taskId, workspaceId, message, progress);
+    const taskUpdate = await taskUpdateService.updateTask(userId, taskId, workspaceId, message, progress);
     return res.status(200).json({
       success: true,
       update: taskUpdate.update,

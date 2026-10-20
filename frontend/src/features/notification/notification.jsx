@@ -58,23 +58,24 @@ const hasUnread = notifications?.some?.(n => n.is_read === 0) ?? false
       
       <button
         onClick={() => setOpen(!open)}
-        className="relative p-2 rounded-md text-[#9A8678] hover:text-[#CAAA98] hover:bg-[#4B4038]/30 transition-colors"
+        aria-label="Notifications"
+        className="relative flex h-11 w-11 items-center justify-center rounded-full text-[#6e6e73] hover:text-[#0066cc] hover:bg-black/5 transition-colors"
       >
         <Bell size={18} />
         {showUnreadBadge && hasUnread && (
-  <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#CAAA98]" />
+  <span className="absolute top-2.5 right-2.5 h-2.5 w-2.5 rounded-full border-2 border-white bg-[#0071e3]" />
 )}
       </button>
 
       {/* Dropdown */}
       {open && (
-        <div className="absolute right-0 mt-2 w-80 bg-[#2F2925] border border-[#4B4038] rounded-xl shadow-xl z-50 overflow-hidden">
+        <div className="absolute right-0 mt-2 w-80 max-w-[calc(100vw-2rem)] bg-white border border-black/10 rounded-2xl shadow-[0_12px_32px_rgba(29,29,31,0.14)] z-50 overflow-hidden">
           {/* Header */}
-          <div className="px-4 py-3 border-b border-[#4B4038] flex justify-between items-center">
-            <h2 className="text-sm font-semibold text-[#E8D9CC]">
+          <div className="px-4 py-3 border-b border-black/10 flex justify-between items-center">
+            <h2 className="text-sm font-semibold text-[#1d1d1f]">
               Notifications
             </h2>
-            <button className="text-xs text-[#CAAA98] hover:underline" onClick={()=>handleRead()}>
+            <button className="min-h-11 px-2 text-xs font-medium text-[#0071e3] hover:underline" onClick={()=>handleRead()}>
               Mark all read
             </button>
             {readMessage && (<p>{readMessage}</p>)}
@@ -88,9 +89,9 @@ const hasUnread = notifications?.some?.(n => n.is_read === 0) ?? false
     notifications.map((n) => (
       <div
         key={n.id}
-        className="px-4 py-3 border-b border-[#4B4038]/40 hover:bg-[#4B4038]/20"
+        className="px-4 py-3 border-b border-black/5 hover:bg-black/[0.035]"
       >
-        <p className="text-sm text-[#E8D9CC]">
+        <p className="text-sm text-[#1d1d1f]">
           <span className="font-semibold">{n.actor_name}</span>{" "}
           {n.type === "create_task" && "created a task"}
           {n.type === "task_doing" && "started working on"}
@@ -103,7 +104,7 @@ const hasUnread = notifications?.some?.(n => n.is_read === 0) ?? false
         </p>
         <span className="font-semibold"> {n.message}</span>
 
-        <p className="text-[10px] text-[#9A8678] mt-1">
+        <p className="text-xs text-[#6e6e73] mt-1">
           {new Date(n.created_at).toLocaleString()}
         </p>
       </div>

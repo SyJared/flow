@@ -1,11 +1,10 @@
 
-const { success } = require("zod");
 const taskService = require("../services/taskService");
-const exportTrainingData = require('../utils/export-training-data')
 
 
 const createTask = async (req,res,next) =>{
-  const { workspaceId, title, description, priority, dueDate, assignedTo } = req.body;
+  const { title, description, priority, dueDate, assignedTo } = req.body;
+  const workspaceId = req.params.id;
   const userId = req.user.id;
 
   try {
@@ -28,6 +27,15 @@ const createTask = async (req,res,next) =>{
     next(err);
   }
 }
+
+const updateTask = async (req, res, next) => {
+  try {
+    const task = await taskService.updateTask(req.params.id, req.params.taskId, req.body);
+    return res.status(200).json({ success: true, task, message: "Task updated successfully" });
+  } catch (err) {
+    next(err);
+  }
+};
 
 const getTasksByWorkspaceId = async (req, res, next) => {
   try {
@@ -126,4 +134,4 @@ const getPastDue = async (req,res,next)=>{
     next(err)
   }
 }
-module.exports = { createTask, getTasksByWorkspaceId , getAllTaskByUserId, bestMember, getPastDue};
+module.exports = { createTask, updateTask, getTasksByWorkspaceId , getAllTaskByUserId, bestMember, getPastDue};

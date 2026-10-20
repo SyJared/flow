@@ -10,7 +10,9 @@ export const handleStatusDoing = async (data)=>{
     },
     body: JSON.stringify(data)
   });
-return res.json();
+  const result = await res.json();
+  if (!res.ok) throw new Error(result.message || "Could not start this task.");
+  return result;
 }
 
 export const taskMarkAsDone = async (data)=>{
@@ -23,5 +25,7 @@ export const taskMarkAsDone = async (data)=>{
     },
     body: JSON.stringify(data)
   })
-  return res.json()
+  const result = await res.json();
+  if (!res.ok) throw new Error(result.message || "Could not complete this task.");
+  return result;
 }

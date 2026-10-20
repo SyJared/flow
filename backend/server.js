@@ -3,7 +3,6 @@ const express = require("express");
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
 const authMiddleware = require("./middleware/authMiddleware");
-const roleMiddleware = require("./middleware/roleMiddleware")
 const db = require("./config/db");
 const app = express();
 const createNotification = require("./utils/createNotification")
@@ -95,9 +94,10 @@ app.use('/api/ai', aiRouter);
 
 // mark as doing
 app.post("/api/auth/status-doing/:id", authMiddleware, assignedMiddleware, (req, res) => {
-  const { id, status, workspaceId, taskId } = req.body;
+  const { status, workspaceId, taskId } = req.body;
+  const userId = req.user.id;
 
-  if (!taskId || !workspaceId || !id) {
+  if (!taskId || !workspaceId) {
     return res.status(400).json({ message: "Missing required fields" });
   }
   
@@ -121,7 +121,7 @@ app.post("/api/auth/status-doing/:id", authMiddleware, assignedMiddleware, (req,
 
       db.query(
         insertUpdateSql,
-        [taskId, workspaceId, id, status || "doing", "Started Doing", 0],
+        [taskId, workspaceId, userId, status || "doing", "Started Doing", 0],
         (err) => {
           if (err) {
             return db.rollback(() =>
@@ -148,7 +148,7 @@ const taskUpdateRoute = require("./routes/taskUpdateRoute");
 app.use("/api/task-update", taskUpdateRoute);
 
 //mark task as done
-app.post("/api/auth/mark-done/:id", authMiddleware, roleMiddleware, (req, res) => {
+app.post("/api/auth/mark-done/:id", authMiddleware, assignedMiddleware, (req, res) => {
   const userId = req.user.id;
   const { workspaceId, taskId, status } = req.body;
 

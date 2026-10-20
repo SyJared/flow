@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../features/auth/authContext";
-import { getAllTaskByUserId, getTask } from "../api/getTask";
-import TaskList from "../features/task/tasklist";
+import { getAllTaskByUserId } from "../api/getTask";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 // Status and priority config
@@ -20,14 +19,16 @@ const PRIORITY_CONFIG = {
 
 function formatDate(dateStr) {
   if (!dateStr) return "—";
-  return new Date(dateStr).toLocaleDateString("en-US", {
+  return new Date(`${String(dateStr).slice(0, 10)}T00:00:00`).toLocaleDateString("en-US", {
     month: "short", day: "numeric", year: "numeric",
   });
 }
 
 function isOverdue(dueDate, status) {
   if (!dueDate || status === "done") return false;
-  return new Date(dueDate) < new Date();
+  const today = new Date();
+  const todayKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+  return String(dueDate).slice(0, 10) < todayKey;
 }
 
 function TaskCard({ task, onClick }) {
@@ -36,58 +37,24 @@ function TaskCard({ task, onClick }) {
   const overdue = isOverdue(task.due_date, task.status);
 
   return (
-    <div
+    <button
+      type="button"
       onClick={() => onClick(task)}
-      className="group relative bg-white border border-gray-200 rounded-2xl p-5 cursor-pointer
-                 hover:border-[#4B4038]/40 hover:shadow-lg hover:-translate-y-0.5
-                 transition-all duration-200 overflow-hidden"
+      className="task-inbox-row group w-full border-b border-gray-200 px-4 py-4 text-left transition-colors hover:bg-white"
     >
-      {/* Top accent line based on priority */}
-      <div className={`absolute top-0 left-0 right-0 h-0.5 ${priority.dot} opacity-60`} />
-
-      {/* Header */}
-      <div className="flex items-start justify-between gap-3 mb-3">
-        <h3 className="text-[#202940] font-semibold text-sm leading-snug line-clamp-2 flex-1">
-          {task.title}
-        </h3>
-        <p className="text-[11px] text-[#9A8678] mt-1">
-        {task.workspace_name}
-      </p>
-        <div className="flex flex-col gap-1.5 items-end flex-shrink-0">
-          <span className={`text-[10px] font-bold tracking-wider uppercase px-2 py-0.5 rounded-full border ${priority.color}`}>
-            {priority.label}
-          </span>
-          <span className={`text-[10px] font-bold tracking-wider uppercase px-2 py-0.5 rounded-full border ${status.color}`}>
-            {status.label}
-          </span>
-        </div>
-      </div>
-
-      {/* Description */}
-      {task.description && (
-        <p className="text-xs text-gray-500 mb-4 leading-relaxed line-clamp-2">
-          {task.description}
-        </p>
-      )}
-
-      {/* Footer meta */}
-            <div className="flex items-center justify-between pt-3 border-t border-gray-100">
-        <div />
-
-        <div className="flex flex-col gap-0.5 items-end">
-          <span className="text-[10px] font-semibold uppercase tracking-wider text-gray-400">
-            Due
-          </span>
-          <span className={`text-xs font-medium ${overdue ? "text-red-600" : "text-[#202940]"}`}>
-            {overdue && "⚠ "}{formatDate(task.due_date)}
-          </span>
-        </div>
-      </div>
-    </div>
+      <span className="task-inbox-title-block">
+        <span className="task-inbox-title">{task.title}</span>
+        {task.description && <span className="task-inbox-description">{task.description}</span>}
+      </span>
+      <span className="task-inbox-project">{task.workspace_name}</span>
+      <span className={`task-status-label task-status-${task.status}`}><span aria-hidden="true" />{status.label}</span>
+      <span className="task-inbox-priority"><i className={priority.dot} aria-hidden="true" />{priority.label}</span>
+      <span className={`task-inbox-due ${overdue ? "is-overdue" : ""}`}>{formatDate(task.due_date)}{overdue && <span className="sr-only">, overdue</span>}</span>
+    </button>
   );
 }
 
-function EmptyState({ error }) {
+function EmptyState({ error, hasFilters }) {
   return (
     <div className="col-span-full flex flex-col items-center justify-center py-24 text-center">
       <div className="w-16 h-16 rounded-2xl bg-[#202940]/5 flex items-center justify-center mb-4">
@@ -102,7 +69,7 @@ function EmptyState({ error }) {
             {error}
           </div>
         )}
-      <p className="text-sm text-gray-400">Tasks assigned to this workspace will appear here.</p>
+      <p className="text-sm text-gray-500">{hasFilters ? "Try adjusting your filters." : error ? "Your tasks could not be loaded." : "Tasks assigned to you will appear here."}</p>
     </div>
   );
 }
@@ -124,8 +91,6 @@ function TasksPage() {
   const tasksPerPage = 9;
 
   // Modal (reuse existing TaskList's modal by rendering TaskList or open manually)
-  const [selectedTask, setSelectedTask] = useState(null);
-  const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
     if (userLoading) return;
@@ -172,7 +137,15 @@ function TasksPage() {
 
   const pageCount = Math.max(1, Math.ceil(filtered.length / tasksPerPage));
   const pageStart = (currentPage - 1) * tasksPerPage;
-  const paginatedTasks = filtered.slice(pageStart, pageStart + tasksPerPage);
+  const orderedTasks = [...filtered].sort((a, b) => {
+    const aOverdue = isOverdue(a.due_date, a.status);
+    const bOverdue = isOverdue(b.due_date, b.status);
+    if (aOverdue !== bOverdue) return aOverdue ? -1 : 1;
+    if (!a.due_date) return 1;
+    if (!b.due_date) return -1;
+    return new Date(a.due_date) - new Date(b.due_date);
+  });
+  const paginatedTasks = orderedTasks.slice(pageStart, pageStart + tasksPerPage);
   const visibleStart = filtered.length === 0 ? 0 : pageStart + 1;
   const visibleEnd = Math.min(pageStart + tasksPerPage, filtered.length);
 
@@ -298,18 +271,19 @@ function TasksPage() {
 
 
         {/* Task Grid */}
-        <div className="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-4">
+        <div className="task-inbox-list overflow-hidden rounded-2xl border border-black/10 bg-white">
+          {filtered.length > 0 && (
+            <div className="task-inbox-column-head"><span>Task</span><span>Workspace</span><span>Status</span><span>Priority</span><span>Due date</span></div>
+          )}
           {filtered.length > 0
             ? paginatedTasks.map((task) => (
                 <TaskCard
                   key={task.id}
                   task={task}
-                  onClick={(t) => { setSelectedTask(t); setIsOpen(true);
-                    navigate(`/workspace/${t.workspace_id}`, { state: { openTask: t } })
-                   }}
+                  onClick={(t) => navigate(`/workspace/${t.workspace_id}`, { state: { openTask: t } })}
                 />
               ))
-            : <EmptyState error={error} />
+            : <EmptyState error={error} hasFilters={statusFilter !== "all" || priorityFilter !== "all" || Boolean(search)} />
           }
         </div>
       </div>

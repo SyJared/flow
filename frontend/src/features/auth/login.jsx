@@ -47,11 +47,11 @@ function Login() {
     <>
       <style>{`
       
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        .login-root, .login-root *, .login-root *::before, .login-root *::after { box-sizing: border-box; }
 
         .login-root {
-          min-height: 93vh;
-          background-color: #e8e4e0;
+          min-height: calc(100vh - 64px);
+          background-color: #f5f5f7;
           display: flex;
           
           position: relative;
@@ -62,7 +62,7 @@ function Login() {
         .login-panel {
           display: none;
           width: 42%;
-          background-color: #202940;
+          background: linear-gradient(145deg, #202124 0%, #152337 100%);
           padding: 3rem;
          
           
@@ -86,7 +86,7 @@ function Login() {
           width: 380px;
           height: 380px;
           border-radius: 50%;
-          background: radial-gradient(circle, rgba(154,134,120,0.18) 0%, transparent 70%);
+          background: radial-gradient(circle, rgba(0,113,227,0.28) 0%, transparent 70%);
           top: -100px;
           right: -120px;
         }
@@ -96,7 +96,7 @@ function Login() {
           width: 260px;
           height: 260px;
           border-radius: 50%;
-          background: radial-gradient(circle, rgba(75,64,56,0.35) 0%, transparent 70%);
+          background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%);
           bottom: 80px;
           left: -60px;
         }
@@ -117,7 +117,7 @@ function Login() {
 
         .panel-headline em {
           font-style: italic;
-          color: #CAAA98;
+          color: #8fc7ff;
         }
 
         .panel-sub {
@@ -157,7 +157,12 @@ function Login() {
 
         .login-card {
           width: 100%;
-          max-width: 400px;
+          max-width: 440px;
+          padding: 40px;
+          border: 1px solid rgba(29,29,31,0.08);
+          border-radius: 24px;
+          background: rgba(255,255,255,0.88);
+          box-shadow: 0 16px 48px rgba(29,29,31,0.08), 0 2px 8px rgba(29,29,31,0.035);
         }
 
         .card-eyebrow {
@@ -172,7 +177,8 @@ function Login() {
         .card-title {
           
           font-size: 2rem;
-          color: #202940;
+          letter-spacing: -0.025em;
+          color: #1d1d1f;
           margin-bottom: 0.4rem;
           line-height: 1.2;
         }
@@ -265,8 +271,8 @@ function Login() {
         .submit-btn {
           width: 100%;
           height: 48px;
-          background: #202940;
-          color: #F4E6DA;
+          background: #0071e3;
+          color: #fff;
           border: none;
           border-radius: 10px;
           
@@ -284,7 +290,7 @@ function Login() {
           gap: 8px;
         }
 
-        .submit-btn:hover:not(:disabled) { background: #2d3a55; }
+        .submit-btn:hover:not(:disabled) { background: #0077ed; }
         .submit-btn:active:not(:disabled) { transform: scale(0.985); }
         .submit-btn:disabled { opacity: 0.7; cursor: not-allowed; }
 

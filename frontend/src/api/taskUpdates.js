@@ -10,5 +10,7 @@ export const taskUpdates= async(data)=>{
     },
     body: JSON.stringify(data)
   })
-  return res.json()
+  const result = await res.json();
+  if (!res.ok) throw new Error(result.message || "Could not save this update.");
+  return result;
 }

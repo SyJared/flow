@@ -4,6 +4,7 @@ import { Navigate, Route, Routes } from 'react-router-dom'
 import Register from './pages/register'
 import WorkspacePage from './pages/workspacePage'
 import Header from './features/header/header'
+import Sidebar from './features/navigation/sidebar'
 
 import TasksPage from './pages/taskpage'
 import DashboardPage from './pages/dashboard'
@@ -28,22 +29,25 @@ function GuestOnly({ children }) {
 
 
 function App() {
+  const { user } = useAuth()
   return (
     <>
-<Header />
-<Routes>
-
-  <Route path='/dashboard' element={<DashboardPage />} />
-  <Route path='/teams' element={<TeamsPage />} />
-  <Route path='/profile' element={<ProfilePage />} />
-  <Route path='/settings' element={<SettingsPage />} />
-  <Route path='/workspace/tasks/:userId' element={<TasksPage/>} />
-  <Route path='/workspace/:id' element={<WorkspacePage />} />
-  <Route path='/register' element={<Register />} />
-  <Route path="/" element={<HomeRedirect />} />
-  <Route path="/login" element={<GuestOnly><Login /></GuestOnly>} />
-  <Route path="/logged" element={<LoggedIn />} />
-</Routes>
+      <Header />
+      {user && <Sidebar />}
+      <div className={`app-main ${user ? "app-main-with-sidebar" : ""}`}>
+        <Routes>
+          <Route path='/dashboard' element={<DashboardPage />} />
+          <Route path='/teams' element={<TeamsPage />} />
+          <Route path='/profile' element={<ProfilePage />} />
+          <Route path='/settings' element={<SettingsPage />} />
+          <Route path='/workspace/tasks/:userId' element={<TasksPage />} />
+          <Route path='/workspace/:id' element={<WorkspacePage />} />
+          <Route path='/register' element={<Register />} />
+          <Route path="/" element={<HomeRedirect />} />
+          <Route path="/login" element={<GuestOnly><Login /></GuestOnly>} />
+          <Route path="/logged" element={<LoggedIn />} />
+        </Routes>
+      </div>
     </>
   )
 }

@@ -18,15 +18,18 @@ function WorkspacePage() {
   const {user, userLoading} = useAuth()
   const navigate = useNavigate()
   const [loading, setLoading] = useState(true);
+  const [workspaceError, setWorkspaceError] = useState('');
   const [workspace, setWorkspace] = useState(null);
   const { id } = useParams();
 
   const [nameParam, setNameParam] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [searchMessage, setSearchMessage] = useState('');
+  const [searchingMembers, setSearchingMembers] = useState(false);
 
   const [selectedUser, setSelectedUser] = useState({ user: null, role: 'member' });
   const [assignMessage, setAssignMessage] = useState('');
+  const [assigningMember, setAssigningMember] = useState(false);
 
   const [members, setMembers] = useState([]);
 
@@ -47,13 +50,16 @@ function WorkspacePage() {
     assignedTo: ''
   });
   const [taskMessage, setTaskMessage] = useState('');
+  const [creatingTask, setCreatingTask] = useState(false);
 
   const [isEditingMembers, setIsEditingMembers] = useState(true);
   const [memberRoleEdit, setMemberRoleEdit] = useState({ id: null, role: 'member' });
   const [selectedEdit, setSelectedEdit] = useState();
   const [editMemberRoleMessage, setEditMemberRoleMessage] = useState('');
 
-  const [taskListMessage, setTaskListMessage] = useState('');
+  const [savingMemberRole, setSavingMemberRole] = useState(false);
+  const [recommendationMessage, setRecommendationMessage] = useState('');
+  const canManageWorkspace = ['owner', 'admin'].includes(workspace?.role);
 
   useEffect(() => {
   if (userLoading) return; // IMPORTANT
@@ -64,15 +70,22 @@ function WorkspacePage() {
 }, [user, userLoading, navigate]);
 
   useEffect(() => {
+  if (userLoading || !user?.id) return;
+  let cancelled = false;
+  setLoading(true);
+  setWorkspaceError('');
   const loadWorkspace = async () => {
     try {
       const workspaceId = id;
       const data = await getWorkspaceById(id);
       const membersData = await getWorkspaceMembers(id);
       const tasksData = await getTask(workspaceId);
+      if (cancelled) return;
       setWorkspace(data.workspace);
+      setWorkspaceError('');
       // SAFE MEMBERS
       setMembers(membersData.members || []);
+      if (user?.id) setTaskInfo(current => ({ ...current, assignedTo: current.assignedTo || String(user.id) }));
 
       // SAFE TASKS
       if (Array.isArray(tasksData.tasks)) {
@@ -85,43 +98,55 @@ function WorkspacePage() {
 
     } catch (err) {
       console.error('Error loading workspace: ', err);
-
+      if (cancelled) return;
+      setWorkspaceError(err.message || 'This workspace could not be loaded.');
       setTasks([]);
       setMembers([]);
       setTasksMessage('Failed to load tasks');
     } finally {
-      setLoading(false);
+      if (!cancelled) setLoading(false);
     }
   };
 
   loadWorkspace();
-}, [id]);
+  return () => { cancelled = true; };
+}, [id, user?.id, userLoading]);
 
   const handleSearch = async (e) => {
     e.preventDefault();
+    setSearchingMembers(true);
+    setSearchMessage('');
     try {
-
       const res = await searchName(nameParam);
-      setSearchResults(res.users);
-      setSearchMessage(res.message);
+      setSearchResults(Array.isArray(res.users) ? res.users : []);
+      setSearchMessage(res.message || '');
     } catch (err) {
       console.error(err);
+      setSearchMessage('Could not search members. Try again.');
+    } finally {
+      setSearchingMembers(false);
     }
   };
 
  const handleBestMember = async(e)=>{
   e.preventDefault();
+  setRecommendationMessage('');
   try {
     const res = await bestMember(id)
     if(res.success){
       setRecommended(res.recommendation)
+      if (!res.recommendation?.length) setRecommendationMessage('There is not enough completed task history to make a recommendation yet.');
+    } else {
+      setRecommendationMessage(res.message || 'Could not create a recommendation.');
     }
   } catch (err) {
-    console.log(err)
+    setRecommendationMessage(err.message || 'Could not create a recommendation.');
   }
  }
 
   const handleAssign = async () => {
+    if (!selectedUser.user) return;
+    setAssigningMember(true);
     try {
       const res = await assignMember({ workspaceId: id, userId: selectedUser.user.id, role: selectedUser.role });
       setAssignMessage(res.message);
@@ -135,12 +160,17 @@ function WorkspacePage() {
       }
     } catch (err) {
       console.error(err);
+      setAssignMessage(err.message || 'Could not add this member.');
+    } finally {
+      setAssigningMember(false);
     }
   };
 
   const handleCreateTask = async (e) => {
   e.preventDefault();
-
+  setCreatingTask(true);
+  setTaskMessage('');
+  setTaskErrors([]);
   try {
     const res = await createTask(taskInfo);
 
@@ -154,15 +184,20 @@ function WorkspacePage() {
     setTaskMessage(res.message);
     const refreshed = await getTask(id);
     setTasks(Array.isArray(refreshed.tasks) ? refreshed.tasks : []);
+    setTaskInfo(current => ({ ...current, title: '', description: '', priority: 'medium', dueDate: '' }));
 
   } catch (err) {
     console.error(err);
-    setTaskMessage("Server error");
+    setTaskMessage(err.message || "Could not create task. Please try again.");
+  } finally {
+    setCreatingTask(false);
   }
 };
 
   const handleMemberEdit = async (e) => {
     e.preventDefault();
+    setSavingMemberRole(true);
+    setEditMemberRoleMessage('');
     try {
       const res = await editMember({ id: id, role: memberRoleEdit.role, memberId: selectedEdit.id });
       setEditMemberRoleMessage(res.message);
@@ -172,7 +207,9 @@ function WorkspacePage() {
         setSelectedEdit(current => current ? { ...current, role: memberRoleEdit.role } : current);
       }
     } catch (err) {
-      console.log(err);
+      setEditMemberRoleMessage(err.message || 'Could not update this role.');
+    } finally {
+      setSavingMemberRole(false);
     }
   };
 
@@ -181,6 +218,18 @@ function WorkspacePage() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <p className="text-gray-500 text-lg">Loading workspace…</p>
       </div>
+    );
+  }
+  if (workspaceError || !workspace) {
+    return (
+      <main className="mx-auto max-w-3xl px-6 py-16">
+        <div className="rounded-2xl border border-black/10 bg-white p-7">
+          <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Workspace unavailable</p>
+          <h1 className="mt-2 text-xl font-semibold text-gray-900">{workspaceError || 'This workspace could not be found.'}</h1>
+          <p className="mt-2 text-sm text-gray-600">It may have been removed, or your membership may have changed.</p>
+          <button type="button" onClick={() => navigate('/logged')} className="mt-5 min-h-11 rounded-xl bg-blue-600 px-4 text-sm font-semibold text-white hover:bg-blue-700">Go to workspaces</button>
+        </div>
+      </main>
     );
   }
   const aggregated = (() => {
@@ -212,19 +261,20 @@ const getLabel = (days) => {
 };
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-15 pb-12">
+    <div className="workspace-page min-h-screen bg-gray-50 pt-15 pb-12 px-4 sm:px-6">
 
       {/* Header */}
-      <div className="bg-gray-900 rounded-xl px-6 py-4 mb-6 flex items-center justify-between shadow-sm">
+      <header className="workspace-page-header mb-5 flex items-center justify-between gap-4 rounded-2xl border border-black/10 bg-white px-5 py-4">
         <div className="flex flex-col gap-1">
-          <h1 className="text-amber-100 text-xl font-semibold tracking-tight">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500">Workspace</p>
+          <h1 className="text-gray-900 text-2xl font-semibold tracking-tight">
             {workspace.workspace_name}
           </h1>
-          <div className="flex items-center gap-3 text-xs uppercase tracking-wider font-medium text-amber-200/70">
+          <div className="flex items-center gap-3 text-xs text-gray-500">
             <span>
-              ID: <strong className="text-amber-100 font-semibold">{id}</strong>
+              Workspace <strong className="font-medium text-gray-700">#{id}</strong>
             </span>
-            <span className="w-1 h-1 bg-amber-200/50 rounded-full"></span>
+            <span className="h-1 w-1 rounded-full bg-gray-300"></span>
             <span>
               {new Date(workspace.created_at).toLocaleDateString('en-US', {
                 month: 'short',
@@ -234,33 +284,39 @@ const getLabel = (days) => {
             </span>
           </div>
         </div>
-        <span className="bg-gray-800 text-amber-100 text-xs font-semibold tracking-wider uppercase px-3 py-1 rounded-full">
-          Workspace
+        <span className="rounded-full bg-gray-100 px-3 py-1.5 text-xs font-medium capitalize text-gray-700">
+          {workspace.role}
         </span>
-      </div>
+      </header>
 
       {/* Main Grid */}
-      <div className="grid grid-cols-[300px_1fr] gap-5">
+      <div className={canManageWorkspace ? "grid grid-cols-1 lg:grid-cols-[320px_minmax(0,1fr)] gap-5" : "grid grid-cols-1 gap-5"}>
 
         {/* Members Card — spans 2 rows */}
-        <div className="row-span-2 bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+        <div className={`${canManageWorkspace ? "row-span-2" : ""} bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden`}>
           <div className="px-5 py-4 border-b border-gray-200 flex items-center justify-between">
             <h2 className="text-gray-900 text-base font-semibold">Members</h2>
-            <button
+            {canManageWorkspace && <button
               onClick={() => setIsEditingMembers(i => !i)}
               className="w-8 h-8 rounded-lg border border-gray-300 text-gray-500 text-xs font-bold flex items-center justify-center hover:bg-gray-900 hover:text-amber-100 hover:border-gray-900 transition-colors"
+              aria-label={isEditingMembers ? "Stop editing members" : "Edit member roles"}
             >
               {isEditingMembers ? '✕' : '✎'}
-            </button>
+            </button>}
           </div>
           <div className="p-4">
-            {isEditingMembers ? (
+            {isEditingMembers && canManageWorkspace ? (
               <>
                 {members.map((m) => (
                   <div
                     key={m.id}
-                    onClick={() => setSelectedEdit(m)}
-                    className={`flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer mb-1 transition-colors ${selectedEdit?.id === m.id ? 'bg-gray-900' : 'hover:bg-amber-50'}`}
+                    onClick={() => {
+                      if (m.role === 'owner') return;
+                      setSelectedEdit(m);
+                      setMemberRoleEdit({ id: m.id, role: m.role });
+                    }}
+                    aria-disabled={m.role === 'owner'}
+                    className={`flex items-center gap-3 px-3 py-2 rounded-lg ${m.role === 'owner' ? 'cursor-not-allowed' : 'cursor-pointer'} mb-1 transition-colors ${selectedEdit?.id === m.id ? 'bg-gray-900' : 'hover:bg-amber-50'}`}
                   >
                     <div className="w-9 h-9 rounded-full bg-gradient-to-br from-gray-800 to-amber-800 flex items-center justify-center overflow-hidden text-amber-100 text-xs font-semibold flex-shrink-0">
                       {m.profile_picture ? <img src={`http://localhost:5000${m.profile_picture}`} alt="" className="h-full w-full object-cover" /> : getInitials(m.name)}
@@ -292,8 +348,8 @@ const getLabel = (days) => {
                           <option value="admin">Admin</option>
                         </select>
                       </div>
-                      <button type="submit" className="bg-gray-900 text-amber-100 text-xs font-semibold px-4 py-1.5 rounded-lg hover:bg-gray-800 transition-colors">
-                        Save
+                      <button type="submit" disabled={savingMemberRole} className="bg-gray-900 text-amber-100 text-xs font-semibold px-4 py-1.5 rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-60">
+                        {savingMemberRole ? 'Saving…' : 'Save'}
                       </button>
                       {editMemberRoleMessage && (
                         <p className="mt-2 text-xs text-gray-800 bg-amber-100/30 border border-amber-200 rounded-lg px-3 py-2">{editMemberRoleMessage}</p>
@@ -323,6 +379,7 @@ const getLabel = (days) => {
           </div>
         </div>
 
+        {canManageWorkspace && <>
         {/* Search & Assign Card */}
         <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
           <div className="px-5 py-4 border-b border-gray-200">
@@ -330,17 +387,19 @@ const getLabel = (days) => {
           </div>
           <div className="p-4">
             <form onSubmit={handleSearch}>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">Search by name</label>
-              <div className="flex">
+              <label htmlFor="member-search" className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">Search by name</label>
+              <div className="flex gap-2">
                 <input
                   type="text"
+                  id="member-search"
                   placeholder="Enter a user name…"
                   value={nameParam}
                   onChange={(e) => setNameParam(e.target.value)}
+                  required
                   className="flex-1 border border-gray-300 rounded-l-lg px-3 py-2 text-sm text-gray-900 bg-white outline-none focus:border-gray-400 focus:ring-1 focus:ring-gray-300"
                 />
-                <button type="submit" className="bg-gray-900 text-amber-100 text-sm font-semibold px-4 py-2 rounded-r-lg hover:bg-gray-800 transition-colors">
-                  Search
+                <button type="submit" disabled={searchingMembers} className="bg-gray-900 text-amber-100 text-sm font-semibold px-4 py-2 rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-60">
+                  {searchingMembers ? 'Searching…' : 'Search'}
                 </button>
               </div>
             </form>
@@ -382,11 +441,12 @@ const getLabel = (days) => {
                     <option value="admin">Admin</option>
                   </select>
                 </div>
-                <button
+              <button
                   onClick={handleAssign}
-                  className="bg-amber-100 text-gray-900 text-xs font-bold px-4 py-1.5 rounded-lg hover:bg-amber-200 transition-colors"
+                disabled={assigningMember}
+                className="bg-amber-100 text-gray-900 text-xs font-bold px-4 py-1.5 rounded-lg hover:bg-amber-200 transition-colors disabled:opacity-60"
                 >
-                  Assign to Workspace
+                {assigningMember ? 'Adding…' : 'Add to workspace'}
                 </button>
                 {assignMessage && <p className="mt-2 text-xs text-amber-100/90 bg-white/10 rounded-lg px-3 py-2">{assignMessage}</p>}
               </div>
@@ -404,19 +464,27 @@ const getLabel = (days) => {
           <div className="p-4">
             <form onSubmit={handleCreateTask} className="flex flex-col gap-4">
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">Title</label>
+                <label htmlFor="task-title" className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">Title</label>
                 <input
                   type="text"
+                  id="task-title"
                   placeholder="Task title"
+                  required
+                  minLength={5}
+                  maxLength={50}
                   value={taskInfo.title}
                   onChange={(e) => setTaskInfo({ ...taskInfo, title: e.target.value })}
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 bg-white outline-none focus:border-gray-400 focus:ring-1 focus:ring-gray-300"
                 />
               </div>
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">Description</label>
+                <label htmlFor="task-description" className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">Description</label>
                 <textarea
+                  id="task-description"
                   placeholder="Task description"
+                  required
+                  minLength={10}
+                  maxLength={100}
                   value={taskInfo.description}
                   onChange={(e) => setTaskInfo({ ...taskInfo, description: e.target.value })}
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 bg-white outline-none focus:border-gray-400 focus:ring-1 focus:ring-gray-300 resize-y min-h-[80px]"
@@ -424,8 +492,9 @@ const getLabel = (days) => {
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">Priority</label>
+                  <label htmlFor="task-priority" className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">Priority</label>
                   <select
+                    id="task-priority"
                     value={taskInfo.priority}
                     onChange={(e) => setTaskInfo({ ...taskInfo, priority: e.target.value })}
                     className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 bg-white outline-none focus:border-gray-400"
@@ -436,9 +505,11 @@ const getLabel = (days) => {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">Due Date</label>
+                  <label htmlFor="task-due-date" className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">Due Date <span className="font-normal normal-case tracking-normal">(optional)</span></label>
                   <input
                     type="date"
+                    id="task-due-date"
+                    min={new Date().toISOString().slice(0, 10)}
                     value={taskInfo.dueDate}
                     onChange={(e) => setTaskInfo({ ...taskInfo, dueDate: e.target.value })}
                     className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 bg-white outline-none focus:border-gray-400"
@@ -446,8 +517,10 @@ const getLabel = (days) => {
                 </div>
               </div>
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">Assign to</label>
+                <label htmlFor="task-assignee" className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">Assign to</label>
                 <select
+                  id="task-assignee"
+                  required
                   value={taskInfo.assignedTo}
                   onChange={(e) => setTaskInfo({ ...taskInfo, assignedTo: e.target.value })}
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 bg-white outline-none focus:border-gray-400"
@@ -463,6 +536,7 @@ const getLabel = (days) => {
 >
   AI Recommend
 </button>
+{recommendationMessage && <p className="mt-2 text-xs text-gray-600" role="status">{recommendationMessage}</p>}
 
 {aggregated.length > 0 && (
   <div className="mt-2 rounded-lg border border-gray-200 overflow-hidden">
@@ -474,10 +548,12 @@ const getLabel = (days) => {
         const member = members.find(m => m.id === memberId);
         const { text, color } = getLabel(avg);
         return (
-          <div
+          <button
+            type="button"
             key={memberId}
             onClick={() => setTaskInfo({ ...taskInfo, assignedTo: memberId })}
-            className={`flex items-center justify-between px-3 py-2.5 cursor-pointer hover:bg-gray-50 transition-colors ${taskInfo.assignedTo === memberId ? "bg-blue-50" : ""}`}
+            aria-pressed={String(taskInfo.assignedTo) === String(memberId)}
+            className={`w-full flex items-center justify-between px-3 py-2.5 text-left hover:bg-gray-50 transition-colors ${String(taskInfo.assignedTo) === String(memberId) ? "bg-blue-50" : ""}`}
           >
             <div className="flex items-center gap-2">
               {index === 0 && (
@@ -488,15 +564,15 @@ const getLabel = (days) => {
               </span>
             </div>
             <span className={`text-xs font-medium ${color}`}>{text}</span>
-          </div>
+          </button>
         );
       })}
     </div>
   </div>
 )}
               </div>
-              <button type="submit" className="w-full bg-gray-900 text-amber-100 text-sm font-semibold py-2.5 rounded-lg hover:bg-gray-800 transition-colors shadow-sm">
-                Create Task
+              <button type="submit" disabled={creatingTask} className="w-full bg-gray-900 text-amber-100 text-sm font-semibold py-2.5 rounded-lg hover:bg-gray-800 transition-colors shadow-sm disabled:opacity-60">
+                {creatingTask ? 'Creating…' : 'Create task'}
               </button>
               {taskMessage && <p className="text-xs text-gray-800 bg-amber-100/30 border border-amber-200 rounded-lg px-3 py-2">{taskMessage}</p>}
               {taskErrors.length > 0 && (
@@ -512,12 +588,16 @@ const getLabel = (days) => {
           </div>
         </div>
 
+        </>}
+
         {/* Tasks List — full width */}
         <TaskList
   tasks={tasks}
   taskMessage={tasksMessage}
   user={user?.id}
   workspaceId={id}
+  members={members}
+  canManage={canManageWorkspace}
   onTaskChange={async () => {
     const refreshed = await getTask(id);
     setTasks(Array.isArray(refreshed.tasks) ? refreshed.tasks : []);

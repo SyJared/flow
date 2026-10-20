@@ -6,9 +6,10 @@ const taskSchema = z.object({
   description: z.string().min(10, "Description must be at least 10 characters long").max(100, "Description must be at most 100 characters long"),
   priority: z.enum(['low', 'medium', 'high']),
   dueDate: z.string().refine(date => {
+    if (!date) return true;
     const parsedDate = Date.parse(date);
-    return !isNaN(parsedDate) && parsedDate > Date.now();
-  }, "Due date must be a valid future date"),
+    return !isNaN(parsedDate) && new Date(`${date}T23:59:59`).getTime() > Date.now();
+  }, "Due date must be a valid future date").optional().nullable(),
   assignedTo: z.coerce.number()
 });
 
