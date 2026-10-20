@@ -13,7 +13,7 @@ const ssl = process.env.DB_SSL === "true"
 
 const db = mysql.createPool({
   host: process.env.DB_HOST,
-  port: Number(process.env.DB_PORT) || 3306,
+  port: Number(process.env.DB_PORT) || 16823,
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
@@ -33,5 +33,6 @@ db.getConnection((err, conn) => {
     conn.release();
   }
 });
+console.log("DB target:", process.env.DB_HOST, process.env.DB_PORT, process.env.DB_SSL);
 
 module.exports = db;
