@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Bell } from "lucide-react";
 import { getNotif, markAsRead } from "../../api/getNotif";
 
-function Notification() {
+function Notification({ showUnreadBadge = true }) {
   const [open, setOpen] = useState(false);
   const [notifications, setNotifications] = useState([])
   const [notifMessage, setNotifMessage] = useState('')
@@ -61,7 +61,7 @@ const hasUnread = notifications?.some?.(n => n.is_read === 0) ?? false
         className="relative p-2 rounded-md text-[#9A8678] hover:text-[#CAAA98] hover:bg-[#4B4038]/30 transition-colors"
       >
         <Bell size={18} />
-        {hasUnread && (
+        {showUnreadBadge && hasUnread && (
   <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#CAAA98]" />
 )}
       </button>

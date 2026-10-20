@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../features/auth/authContext";
 import { getAllTaskByUserId, getTask } from "../api/getTask";
 import TaskList from "../features/task/tasklist";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 // Status and priority config
 const STATUS_CONFIG = {
@@ -119,6 +120,8 @@ function TasksPage() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [priorityFilter, setPriorityFilter] = useState("all");
   const [search, setSearch] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const tasksPerPage = 9;
 
   // Modal (reuse existing TaskList's modal by rendering TaskList or open manually)
   const [selectedTask, setSelectedTask] = useState(null);
@@ -153,6 +156,10 @@ function TasksPage() {
     load();
     
   }, [userId]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [statusFilter, priorityFilter, search]);
   console.log(tasks)
   // Derived filtered tasks
   const filtered = tasks.filter((t) => {
@@ -164,6 +171,12 @@ function TasksPage() {
       t.description?.toLowerCase().includes(search.toLowerCase());
     return matchStatus && matchPriority && matchSearch;
   });
+
+  const pageCount = Math.max(1, Math.ceil(filtered.length / tasksPerPage));
+  const pageStart = (currentPage - 1) * tasksPerPage;
+  const paginatedTasks = filtered.slice(pageStart, pageStart + tasksPerPage);
+  const visibleStart = filtered.length === 0 ? 0 : pageStart + 1;
+  const visibleEnd = Math.min(pageStart + tasksPerPage, filtered.length);
 
   // Counts per status
   const counts = {
@@ -203,6 +216,28 @@ function TasksPage() {
                 )}
               </p>
             </div>
+            {filtered.length > 0 && (
+              <div className="flex items-center gap-3 text-xs text-[#6F6258]">
+                <span>{visibleStart}–{visibleEnd} of {filtered.length}</span>
+                <div className="flex items-center gap-1">
+                  <button
+                    type="button"
+                    aria-label="Previous page"
+                    disabled={currentPage === 1}
+                    onClick={() => setCurrentPage(page => Math.max(1, page - 1))}
+                    className="flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 bg-white text-[#4B4038] hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
+                  ><ChevronLeft size={16} /></button>
+                  <span className="min-w-12 text-center font-medium text-[#202940]">{currentPage} / {pageCount}</span>
+                  <button
+                    type="button"
+                    aria-label="Next page"
+                    disabled={currentPage >= pageCount}
+                    onClick={() => setCurrentPage(page => Math.min(pageCount, page + 1))}
+                    className="flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 bg-white text-[#4B4038] hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
+                  ><ChevronRight size={16} /></button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
@@ -267,7 +302,7 @@ function TasksPage() {
         {/* Task Grid */}
         <div className="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-4">
           {filtered.length > 0
-            ? filtered.map((task) => (
+            ? paginatedTasks.map((task) => (
                 <TaskCard
                   key={task.id}
                   task={task}

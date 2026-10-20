@@ -8,12 +8,16 @@ import Header from './features/header/header'
 import TasksPage from './pages/taskpage'
 import DashboardPage from './pages/dashboard'
 import TeamsPage from './pages/teams'
+import ProfilePage from './pages/profile'
+import SettingsPage from './pages/settings'
 import { useAuth } from './features/auth/authContext'
+import { getPreferences } from './utils/preferences'
 
 function HomeRedirect() {
   const { user, userLoading } = useAuth();
   if (userLoading) return null;
-  return <Navigate to={user ? "/dashboard" : "/login"} replace />;
+  const destination = user ? `/${getPreferences(user.id).landingPage}` : "/login";
+  return <Navigate to={destination} replace />;
 }
 
 function GuestOnly({ children }) {
@@ -31,6 +35,8 @@ function App() {
 
   <Route path='/dashboard' element={<DashboardPage />} />
   <Route path='/teams' element={<TeamsPage />} />
+  <Route path='/profile' element={<ProfilePage />} />
+  <Route path='/settings' element={<SettingsPage />} />
   <Route path='/workspace/tasks/:userId' element={<TasksPage/>} />
   <Route path='/workspace/:id' element={<WorkspacePage />} />
   <Route path='/register' element={<Register />} />

@@ -3,6 +3,7 @@ import { handleStatusDoing, taskMarkAsDone } from "../../api/handleStatusChange"
 import { taskUpdates } from "../../api/taskUpdates";
 import { getTaskUpdates } from "../../api/getTask";
 import { useLocation } from "react-router-dom";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 function ProgressPips({ value }) {
   const filled = Math.round((value / 100) * 5);
@@ -283,10 +284,26 @@ function TaskModal({ isOpen, setIsOpen, selectedTask, user, workspaceId, setSele
   );
 }
 
-function TaskList({ tasks, taskMessage, user, workspaceId }) {
+function TaskList({ tasks = [], taskMessage, user, workspaceId }) {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const tasksPerPage = 9;
   const location = useLocation();
+
+  const pageCount = Math.max(1, Math.ceil(tasks.length / tasksPerPage));
+  const pageStart = (currentPage - 1) * tasksPerPage;
+  const paginatedTasks = tasks.slice(pageStart, pageStart + tasksPerPage);
+  const visibleStart = tasks.length === 0 ? 0 : pageStart + 1;
+  const visibleEnd = Math.min(pageStart + tasksPerPage, tasks.length);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [workspaceId]);
+
+  useEffect(() => {
+    if (currentPage > pageCount) setCurrentPage(pageCount);
+  }, [currentPage, pageCount]);
 
   useEffect(() => {
     if (location.state?.openTask) {
@@ -303,17 +320,39 @@ function TaskList({ tasks, taskMessage, user, workspaceId }) {
   return (
     <>
       <div className="col-span-2 bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-        <div className="px-5 py-4 border-b border-gray-200 flex items-center justify-between">
+        <div className="px-5 py-4 border-b border-gray-200 flex items-center justify-between gap-3">
           <h2 className="text-gray-900 text-base font-semibold">Tasks</h2>
-          <span className="bg-gray-900 text-amber-100 text-xs font-semibold tracking-wider uppercase px-3 py-1 rounded-full">
-            {(tasks && tasks.length) || "0"}
-          </span>
+          <div className="flex items-center gap-3">
+            <span className="bg-gray-900 text-amber-100 text-xs font-semibold tracking-wider uppercase px-3 py-1 rounded-full">
+              {tasks.length}
+            </span>
+            {tasks.length > 0 && (
+              <div className="flex items-center gap-2 text-xs text-gray-500">
+                <span className="hidden sm:inline">{visibleStart}–{visibleEnd} of {tasks.length}</span>
+                <button
+                  type="button"
+                  aria-label="Previous task page"
+                  disabled={currentPage === 1}
+                  onClick={() => setCurrentPage(page => Math.max(1, page - 1))}
+                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
+                ><ChevronLeft size={16} /></button>
+                <span className="min-w-12 text-center font-medium text-gray-700">{currentPage} / {pageCount}</span>
+                <button
+                  type="button"
+                  aria-label="Next task page"
+                  disabled={currentPage >= pageCount}
+                  onClick={() => setCurrentPage(page => Math.min(pageCount, page + 1))}
+                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
+                ><ChevronRight size={16} /></button>
+              </div>
+            )}
+          </div>
         </div>
         <div className="p-4">
           
           {tasks.length > 0 ? (
             <div className="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-4">
-              {tasks.map((task) => (
+              {paginatedTasks.map((task) => (
                 <div
                   key={task.id}
                   className="border border-gray-200 rounded-lg p-4 hover:border-gray-300 hover:shadow-md transition-all cursor-pointer"

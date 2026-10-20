@@ -1,15 +1,28 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "../auth/authContext";
 import { Bell, ChevronDown, Menu, LayoutDashboard, FolderKanban, CheckSquare, Users, X } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Notification from "../notification/notification";
+import { getPreferences } from "../../utils/preferences";
 
 function Header() {
   const { user, userLoading, logout } = useAuth();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [preferences, setPreferences] = useState(() => getPreferences(user?.id));
   const navigate = useNavigate();
   const location = useLocation();
+
+  useEffect(() => {
+    const syncPreferences = event => {
+      if (!event?.detail?.userId || Number(event.detail.userId) === Number(user?.id)) {
+        setPreferences(getPreferences(user?.id));
+      }
+    };
+    setPreferences(getPreferences(user?.id));
+    window.addEventListener("flow-preferences-changed", syncPreferences);
+    return () => window.removeEventListener("flow-preferences-changed", syncPreferences);
+  }, [user?.id]);
 
   const isLoggedIn = !!user;
   const name = user?.name || "User";
@@ -454,7 +467,7 @@ function Header() {
         <div className="hdr-inner">
 
           {/* Logo */}
-          <div className="hdr-logo" onClick={() => navigate(isLoggedIn ? "/dashboard" : "/login")}>
+            <div className="hdr-logo" onClick={() => navigate(isLoggedIn ? `/${preferences.landingPage}` : "/login")}>
             <div className="hdr-logo-icon">F</div>
             <span className="hdr-logo-name">Flow</span>
           </div>
@@ -495,7 +508,7 @@ function Header() {
 
             {isLoggedIn ? (
               <>
-                <Notification />
+                <Notification showUnreadBadge={preferences.showNotificationBadge} />
 
                 <div className="hdr-user-wrap">
                   <button

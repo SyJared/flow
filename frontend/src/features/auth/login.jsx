@@ -2,6 +2,7 @@ import { useState } from "react";
 import { loginUser } from "../../api/auth.js";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "./authContext.jsx";
+import { getPreferences } from "../../utils/preferences.js";
 
 function Login() {
   const { setUser } = useAuth();
@@ -28,7 +29,7 @@ function Login() {
         });
         setIsError(false);
         setMessage(data.message);
-        navigate("/dashboard", { replace: true });
+        navigate(`/${getPreferences(data.user?.id).landingPage}`, { replace: true });
       } else {
         setIsError(true);
         setMessage(data.message);
