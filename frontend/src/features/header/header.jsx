@@ -21,13 +21,15 @@ function Header() {
     navigate("/login");
   };
 
-  const isActive = (path) => location.pathname === path;
+  const isActive = (path) => path === "/teams"
+    ? location.pathname === path || /^\/workspace\/[^/]+$/.test(location.pathname)
+    : location.pathname === path;
 
   const navLinks = [
     { label: "Dashboard", icon: LayoutDashboard, path: "/dashboard" },
     { label: "Workspace", icon: FolderKanban, path: "/logged" },
     { label: "Tasks", icon: CheckSquare, path: `/workspace/tasks/${user?.id}` },
-    { label: "Team", icon: Users, path: "/" },
+    { label: "Teams", icon: Users, path: "/teams" },
   ];
 
   const publicLinks = [
@@ -452,7 +454,7 @@ function Header() {
         <div className="hdr-inner">
 
           {/* Logo */}
-          <div className="hdr-logo" onClick={() => navigate("/")}>
+          <div className="hdr-logo" onClick={() => navigate(isLoggedIn ? "/dashboard" : "/login")}>
             <div className="hdr-logo-icon">F</div>
             <span className="hdr-logo-name">Flow</span>
           </div>

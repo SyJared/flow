@@ -85,9 +85,7 @@ app.use("/api/member", workspaceMemberRoute);
 
 // CREATE TASK
 const taskRoute = require("./routes/taskRoute");
-app.use("/api/tasks", taskRoute);
-
-
+app.use("/api/tasks", taskRoute);   
 
 const aiRouter = require('./routes/aiRoute');
 app.use('/api/ai', aiRouter);

@@ -1,6 +1,3 @@
-import { useState } from 'react'
-
-
 import Login from './features/auth/login'
 import LoggedIn from './pages/logged'
 import { Navigate, Route, Routes } from 'react-router-dom'
@@ -10,6 +7,20 @@ import Header from './features/header/header'
 
 import TasksPage from './pages/taskpage'
 import DashboardPage from './pages/dashboard'
+import TeamsPage from './pages/teams'
+import { useAuth } from './features/auth/authContext'
+
+function HomeRedirect() {
+  const { user, userLoading } = useAuth();
+  if (userLoading) return null;
+  return <Navigate to={user ? "/dashboard" : "/login"} replace />;
+}
+
+function GuestOnly({ children }) {
+  const { user, userLoading } = useAuth();
+  if (userLoading) return null;
+  return user ? <Navigate to="/dashboard" replace /> : children;
+}
 
 
 function App() {
@@ -19,11 +30,12 @@ function App() {
 <Routes>
 
   <Route path='/dashboard' element={<DashboardPage />} />
+  <Route path='/teams' element={<TeamsPage />} />
   <Route path='/workspace/tasks/:userId' element={<TasksPage/>} />
   <Route path='/workspace/:id' element={<WorkspacePage />} />
   <Route path='/register' element={<Register />} />
-  <Route path="/" element={<Navigate to="/login" />} />
-  <Route path="/login" element={<Login />} />
+  <Route path="/" element={<HomeRedirect />} />
+  <Route path="/login" element={<GuestOnly><Login /></GuestOnly>} />
   <Route path="/logged" element={<LoggedIn />} />
 </Routes>
     </>
