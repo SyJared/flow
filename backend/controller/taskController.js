@@ -93,7 +93,8 @@ const bestMember = async (req, res, next) => {
     }));
 
     // 3. call Python ML API
-    const response = await fetch("http://ml-service:5001/predict-members", {
+    const mlServiceUrl = process.env.ML_SERVICE_URL || "http://ml-service:5001";
+    const response = await fetch(`${mlServiceUrl.replace(/\/$/, "")}/predict-members`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

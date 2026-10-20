@@ -8,6 +8,7 @@ import { createTask } from "../api/createTask";
 import { getTask } from "../api/getTask";
 import { useAuth } from "../features/auth/authContext";
 import TaskList from "../features/task/tasklist";
+import { API_ORIGIN } from "../api/auth";
 
 function getInitials(name = '') {
   return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
@@ -319,7 +320,7 @@ const getLabel = (days) => {
                     className={`flex items-center gap-3 px-3 py-2 rounded-lg ${m.role === 'owner' ? 'cursor-not-allowed' : 'cursor-pointer'} mb-1 transition-colors ${selectedEdit?.id === m.id ? 'bg-gray-900' : 'hover:bg-amber-50'}`}
                   >
                     <div className="w-9 h-9 rounded-full bg-gradient-to-br from-gray-800 to-amber-800 flex items-center justify-center overflow-hidden text-amber-100 text-xs font-semibold flex-shrink-0">
-                      {m.profile_picture ? <img src={`http://localhost:5000${m.profile_picture}`} alt="" className="h-full w-full object-cover" /> : getInitials(m.name)}
+                      {m.profile_picture ? <img src={`${API_ORIGIN}${m.profile_picture}`} alt="" className="h-full w-full object-cover" /> : getInitials(m.name)}
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className={`text-sm font-semibold truncate ${selectedEdit?.id === m.id ? 'text-amber-100' : 'text-gray-900'}`}>{m.name}</p>
@@ -364,7 +365,7 @@ const getLabel = (days) => {
               members.map((member) => (
                 <div key={member.id} className="flex items-center gap-3 px-3 py-2 rounded-lg mb-1">
                   <div className="w-9 h-9 rounded-full bg-gradient-to-br from-gray-800 to-amber-800 flex items-center justify-center overflow-hidden text-amber-100 text-xs font-semibold flex-shrink-0">
-                    {member.profile_picture ? <img src={`http://localhost:5000${member.profile_picture}`} alt="" className="h-full w-full object-cover" /> : getInitials(member.name)}
+                    {member.profile_picture ? <img src={`${API_ORIGIN}${member.profile_picture}`} alt="" className="h-full w-full object-cover" /> : getInitials(member.name)}
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-semibold text-gray-900 truncate">{member.name}</p>
@@ -415,7 +416,7 @@ const getLabel = (days) => {
                     className="w-full flex items-center gap-3 px-3 py-2 rounded-lg border border-transparent hover:bg-amber-50 hover:border-amber-200 transition-all text-left"
                   >
                     <div className="w-8 h-8 rounded-full bg-gradient-to-br from-gray-800 to-amber-800 flex items-center justify-center overflow-hidden text-amber-100 text-xs font-semibold flex-shrink-0">
-                      {user.profile_picture ? <img src={`http://localhost:5000${user.profile_picture}`} alt="" className="h-full w-full object-cover" /> : getInitials(user.name)}
+                      {user.profile_picture ? <img src={`${API_ORIGIN}${user.profile_picture}`} alt="" className="h-full w-full object-cover" /> : getInitials(user.name)}
                     </div>
                     <div>
                       <p className="text-sm font-semibold text-gray-900">{user.name}</p>

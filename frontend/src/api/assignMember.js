@@ -1,8 +1,8 @@
-import { BASE_URL } from "./auth";
+import { API_BASE } from "./auth";
 
 export const assignMember = async (data) =>{
   const token = localStorage.getItem("token");
-  const res = await fetch (`http://localhost:5000/api/member/add-member/${data.workspaceId}`,{
+  const res = await fetch (`${API_BASE}/member/add-member/${data.workspaceId}`,{
     method: 'POST',
     headers:{
       'Content-Type': 'application/json',
@@ -15,7 +15,7 @@ export const assignMember = async (data) =>{
 
 export const editMember = async ({id, role, memberId}) =>{
   const token = localStorage.getItem('token');
-  const res = await fetch(`http://localhost:5000/api/member/edit-role/${id}`,{
+  const res = await fetch(`${API_BASE}/member/edit-role/${id}`,{
     method: 'PUT',
     headers:{
       'Content-Type': 'application/json',
@@ -28,7 +28,7 @@ export const editMember = async ({id, role, memberId}) =>{
 
 export const bestMember = async(id) =>{
   const token = localStorage.getItem('token');
-  const res = await fetch(`http://localhost:5000/api/tasks/best-member/${id}`,{
+  const res = await fetch(`${API_BASE}/tasks/best-member/${id}`,{
     method: "GET",
     headers: {
       'Content-Type': 'application/json',

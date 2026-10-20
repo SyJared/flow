@@ -1,4 +1,6 @@
 
+require("dotenv").config();
+
 const express = require("express");
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
@@ -8,7 +10,16 @@ const app = express();
 const createNotification = require("./utils/createNotification")
 const addNotificationReceivers = require('./utils/addNotificationReceivers')
 
-app.use(cors());
+const allowedOrigins = (process.env.FRONTEND_ORIGIN || "http://localhost:5173")
+  .split(",")
+  .map(origin => origin.trim())
+  .filter(Boolean);
+app.use(cors({
+  origin(origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) return callback(null, true);
+    return callback(new Error("Origin is not allowed by CORS"));
+  },
+}));
 app.use(express.json({ limit: "3mb" }));
 app.use("/uploads", express.static(require("path").join(__dirname, "uploads")));
 
@@ -17,9 +28,6 @@ const bcrypt = require("bcrypt");
 
 const assignedMiddleware = require("./middleware/assignedMiddleware");
 const errorMiddleware = require("./middleware/errorMiddleware");
-
-
-console.log("DB_HOST =", process.env.DB_HOST);
 
 
 // TEST ROUTE
@@ -55,10 +63,10 @@ app.get("/api/auth/me", authMiddleware, (req, res) => {
 
 
 // START SERVER
-const PORT = 5000;
+const PORT = Number(process.env.PORT) || 5000;
 
 app.listen(PORT, "0.0.0.0", () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+  console.log(`Server listening on port ${PORT}`);
 });
 
 //create workspace edit workspace delete workspace

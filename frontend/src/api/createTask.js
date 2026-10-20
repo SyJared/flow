@@ -1,8 +1,8 @@
-import { BASE_URL } from "./auth";
+import { API_BASE } from "./auth";
 
 export const createTask = async (data)=>{
   const token = localStorage.getItem("token");
-  const res = await fetch(`http://localhost:5000/api/tasks/create-task/${data.workspaceId}`, {
+  const res = await fetch(`${API_BASE}/tasks/create-task/${data.workspaceId}`, {
     method: "POST",
     headers:{
       'Content-Type': 'application/json',
@@ -15,7 +15,7 @@ export const createTask = async (data)=>{
 
 export const updateTask = async (workspaceId, taskId, data) => {
   const token = localStorage.getItem("token");
-  const res = await fetch(`http://localhost:5000/api/tasks/update-task/${workspaceId}/${taskId}`, {
+  const res = await fetch(`${API_BASE}/tasks/update-task/${workspaceId}/${taskId}`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",

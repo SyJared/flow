@@ -1,8 +1,8 @@
-import { BASE_URL } from "./auth";
+import { API_BASE } from "./auth";
 
 export const taskUpdates= async(data)=>{
   const token = localStorage.getItem('token');
-  const res = await fetch(`http://localhost:5000/api/task-update/update`, {
+  const res = await fetch(`${API_BASE}/task-update/update`, {
     method:'PUT',
     headers:{
       'Content-Type': 'application/json',

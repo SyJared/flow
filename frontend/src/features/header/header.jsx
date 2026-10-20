@@ -4,6 +4,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import Notification from "../notification/notification";
 import { useAuth } from "../auth/authContext";
 import { getPreferences } from "../../utils/preferences";
+import { API_ORIGIN } from "../../api/auth";
 
 function Header() {
   const { user, userLoading, logout } = useAuth();
@@ -63,7 +64,7 @@ function Header() {
               <div className="app-account-wrap">
                 <button className="app-account-button" onClick={() => setIsDropdownOpen(value => !value)} aria-expanded={isDropdownOpen} aria-haspopup="menu">
                   <span className="app-account-avatar">
-                    {user.profile_picture ? <img src={`http://localhost:5000${user.profile_picture}`} alt="" /> : initials}
+                    {user.profile_picture ? <img src={`${API_ORIGIN}${user.profile_picture}`} alt="" /> : initials}
                   </span>
                   <span className="app-account-name">{name}</span>
                   <ChevronDown size={15} aria-hidden="true" />

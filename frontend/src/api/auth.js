@@ -1,4 +1,6 @@
-export const BASE_URL = "http://localhost:5000/api/auth";
+export const API_ORIGIN = (import.meta.env.VITE_API_ORIGIN || "http://localhost:5000").replace(/\/$/, "");
+export const API_BASE = `${API_ORIGIN}/api`;
+export const BASE_URL = `${API_BASE}/auth`;
 
 export const loginUser = async (data) => {
   const res = await fetch(`${BASE_URL}/login`, {

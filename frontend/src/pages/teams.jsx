@@ -4,6 +4,7 @@ import { ArrowUpRight, Users, FolderKanban } from "lucide-react";
 import { getWorkspaces } from "../api/createWorkspace";
 import { getWorkspaceMembers } from "../api/getWorkspaceById";
 import { useAuth } from "../features/auth/authContext";
+import { API_ORIGIN } from "../api/auth";
 
 const initials = (name = "") => name.trim().split(/\s+/).filter(Boolean).map(part => part[0]).join("").toUpperCase().slice(0, 2) || "?";
 
@@ -100,7 +101,7 @@ function TeamsPage() {
                     <div className="flex -space-x-2" aria-label={`${team.members.length} team members`}>
                       {team.members.slice(0, 5).map(member => (
                         <div key={member.id} title={`${member.name} · ${member.role}`} className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full border-2 border-white bg-[#E8D8CC] text-[10px] font-semibold text-[#4B4038]">
-                          {member.profile_picture ? <img src={`http://localhost:5000${member.profile_picture}`} alt="" className="h-full w-full object-cover" /> : initials(member.name)}
+                          {member.profile_picture ? <img src={`${API_ORIGIN}${member.profile_picture}`} alt="" className="h-full w-full object-cover" /> : initials(member.name)}
                         </div>
                       ))}
                       {team.members.length > 5 && <span className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-[#F3EEEA] text-[10px] font-semibold text-[#5E5248]">+{team.members.length - 5}</span>}

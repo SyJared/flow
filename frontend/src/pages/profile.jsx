@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Camera, Mail, Trash2, UserRound } from "lucide-react";
 import { useAuth } from "../features/auth/authContext";
-import { saveProfilePicture } from "../api/auth";
+import { API_ORIGIN, saveProfilePicture } from "../api/auth";
 
 function ProfilePage() {
   const { user, setUser, userLoading } = useAuth();
@@ -75,7 +75,7 @@ function ProfilePage() {
         <section className="overflow-hidden rounded-2xl border border-[#4B4038]/15 bg-white shadow-sm">
           <div className="flex items-center gap-4 bg-[#202940] px-6 py-7">
             <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#4B4038] text-lg font-semibold text-[#F4E6DA]">
-              {user.profile_picture ? <img src={`http://localhost:5000${user.profile_picture}`} alt={`${name}'s profile`} className="h-full w-full object-cover" /> : initials || <UserRound />}
+              {user.profile_picture ? <img src={`${API_ORIGIN}${user.profile_picture}`} alt={`${name}'s profile`} className="h-full w-full object-cover" /> : initials || <UserRound />}
             </div>
             <div className="min-w-0">
               <h2 className="truncate text-xl font-semibold text-[#F4E6DA]">{name}</h2>

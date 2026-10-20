@@ -1,8 +1,8 @@
-import { BASE_URL } from "./auth";
+import { API_BASE, BASE_URL } from "./auth";
 
 export const getTask = async (workspaceId)=>{
   const token = localStorage.getItem("token");
-  const res = await fetch(`http://localhost:5000/api/tasks/get-tasks/${workspaceId}`, {
+  const res = await fetch(`${API_BASE}/tasks/get-tasks/${workspaceId}`, {
     method: "GET",
     headers:{
       'Content-Type': 'application/json',
@@ -14,7 +14,7 @@ export const getTask = async (workspaceId)=>{
 
 export const getTaskUpdates = async (data)=>{
   const token = localStorage.getItem('token');
-  const res = await fetch(`http://localhost:5000/api/task-update/get-updates/${data.workspaceId}/${data.taskId}`, {
+  const res = await fetch(`${API_BASE}/task-update/get-updates/${data.workspaceId}/${data.taskId}`, {
     method: "GET",
     headers: {  
       Authorization :`Bearer ${token}`
@@ -25,7 +25,7 @@ export const getTaskUpdates = async (data)=>{
 
 export const getAllTaskByUserId = async (userId)=>{
   const token = localStorage.getItem('token');
-  const res = await fetch(`http://localhost:5000/api/tasks/all-task/${userId}`,{
+  const res = await fetch(`${API_BASE}/tasks/all-task/${userId}`,{
     method: 'GET',
     headers:{
       Authorization: `Bearer ${token}`
@@ -49,7 +49,7 @@ export const getRecentActivity = async () => {
 export const getPastDue = async()=>{
   const token = localStorage.getItem("token");
 
-  const res = await fetch(`http://localhost:5000/api/tasks/past-due`,{
+  const res = await fetch(`${API_BASE}/tasks/past-due`,{
     method: 'GET',
     headers:{
       Authorization: `Bearer ${token}`

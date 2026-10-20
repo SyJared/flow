@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../features/auth/authContext";
 import { getAllTaskByUserId, getPastDue, getRecentActivity } from "../api/getTask";
 import { getWorkspaces } from "../api/createWorkspace";
+import { API_BASE } from "../api/auth";
 
 const statusLabel = { todo: "To do", doing: "In progress", done: "Done" };
 const formatDate = date => date ? new Date(date).toLocaleDateString(undefined, { month: "short", day: "numeric" }) : "No due date";
@@ -95,7 +96,7 @@ function DashboardPage() {
     setSummaryError("");
     try {
       const prompt = `Write a concise work summary using only these facts. Assigned tasks: ${tasks.length}. To do: ${counts.todo}. In progress: ${counts.doing}. Done: ${counts.done}. Overdue: ${counts.overdue}. Completed past due: ${pastDue.completedPastDue}. Nearest task: ${pastDue.urgentTask?.title || "none"}. Keep under 80 words.`;
-      const response = await fetch("/api/ai/summary", {
+      const response = await fetch(`${API_BASE}/ai/summary`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ prompt }),

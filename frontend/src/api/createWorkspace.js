@@ -1,9 +1,9 @@
-import { BASE_URL } from "./auth";
+import { API_BASE } from "./auth";
 
 
 export const createWorkspace = async (data) =>{
   const token = localStorage.getItem("token");
-  const res = await fetch (`http://localhost:5000/api/workspaces/create-workspace`, {
+  const res = await fetch (`${API_BASE}/workspaces/create-workspace`, {
     method: 'POST',
     headers:{
       'Content-Type': 'application/json',
@@ -16,7 +16,7 @@ export const createWorkspace = async (data) =>{
 
 export const getWorkspaces = async()=>{
   const token = localStorage.getItem("token");
-  const res = await fetch(`http://localhost:5000/api/workspaces/all-workspace`,{
+  const res = await fetch(`${API_BASE}/workspaces/all-workspace`,{
     method:'GET',
     headers:{
       Authorization: `Bearer ${token}`
@@ -28,7 +28,7 @@ export const getWorkspaces = async()=>{
 export const editWorkspace = async ({ id, name }) => {
   const token = localStorage.getItem('token');
 
-  const res = await fetch(`http://localhost:5000/api/workspaces/edit-workspace/${id}`, {
+  const res = await fetch(`${API_BASE}/workspaces/edit-workspace/${id}`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
@@ -42,7 +42,7 @@ export const editWorkspace = async ({ id, name }) => {
 
 export const deleteWorkspace = async ({id})=>{
   const token = localStorage.getItem('token');
-  const res = await fetch(`http://localhost:5000/api/workspaces/delete-workspace/${id}`, {
+  const res = await fetch(`${API_BASE}/workspaces/delete-workspace/${id}`, {
     method: "DELETE",
     headers:{
       "Content-Type": "application/json",
