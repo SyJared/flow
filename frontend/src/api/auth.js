@@ -27,3 +27,16 @@ export const getMe = async () => {
 
   return data;
 };
+
+export const saveProfilePicture = async imageData => {
+  const token = localStorage.getItem("token");
+  const res = await fetch(`${BASE_URL}/profile-picture`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ imageData }),
+  });
+  return res.json();
+};

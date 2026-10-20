@@ -26,6 +26,7 @@ function Login() {
           id: data.user?.id || null,
           name: data.user?.name || "",
           email: data.user?.email || "",
+          profile_picture: data.user?.profile_picture || null,
         });
         setIsError(false);
         setMessage(data.message);

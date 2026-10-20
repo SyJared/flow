@@ -245,6 +245,7 @@ function Header() {
           width: 30px;
           height: 30px;
           border-radius: 50%;
+          overflow: hidden;
           background: #4B4038;
           display: flex;
           align-items: center;
@@ -515,7 +516,11 @@ function Header() {
                     className="hdr-user-btn"
                     onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                   >
-                    <div className="hdr-avatar">{initials}</div>
+                    <div className="hdr-avatar">
+                      {user?.profile_picture
+                        ? <img src={`http://localhost:5000${user.profile_picture}`} alt="" className="h-full w-full object-cover" />
+                        : initials}
+                    </div>
                     <span className="hdr-username">{name}</span>
                     <ChevronDown
                       size={14}
