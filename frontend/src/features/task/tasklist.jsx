@@ -20,15 +20,14 @@ function ProgressPips({ value }) {
   );
 }
 
-function TaskModal({ isOpen, setIsOpen, selectedTask, user, workspaceId, setSelectedTask }) {
+function TaskModal({ isOpen, setIsOpen, selectedTask, user, workspaceId, setSelectedTask, onTaskChange }) {
   const [updates, setUpdates] = useState([]);
   const [message, setMessage] = useState("");
-  
+
   const [progress, setProgress] = useState(0);
   const [doingMessage, setDoingMessage] = useState("");
   const [submitMessage, setSubmitMessage] = useState("");
   const [doneMessage, setDoneMessage] = useState("");
-  const [taskUpdateId, setTaskUpdateId] = useState();
 
   function formatHoursSpent(decimalHours) {
     if (!decimalHours && decimalHours !== 0) return "0m";
@@ -40,20 +39,20 @@ function TaskModal({ isOpen, setIsOpen, selectedTask, user, workspaceId, setSele
     return `${hours}h ${minutes}m`;
   }
 
-  if (!isOpen || !selectedTask) return null;
-
   useEffect(() => {
+    if (!isOpen || !selectedTask) return;
     const loadUpdates = async () => {
       try {
         const data = await getTaskUpdates({ workspaceId, taskId: selectedTask.id });
-        setUpdates(data.results || []);
-        setTaskUpdateId(data.results.id);
+        setUpdates(Array.isArray(data.results) ? data.results : []);
       } catch (err) {
         console.log(err, "useeffecterror");
       }
     };
     loadUpdates();
-  }, [selectedTask]);
+  }, [isOpen, selectedTask, workspaceId]);
+
+  if (!isOpen || !selectedTask) return null;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -77,14 +76,14 @@ function TaskModal({ isOpen, setIsOpen, selectedTask, user, workspaceId, setSele
       );
       return; // stop here if validation failed
     }
-    
+
       setSubmitMessage(res.message);
       setMessage("");
     setProgress(0);
     } catch (err) {
       console.log(err, "from handlesubmit");
     }
-    
+
   };
 
   const handleStatusChange = async () => {
@@ -95,9 +94,10 @@ function TaskModal({ isOpen, setIsOpen, selectedTask, user, workspaceId, setSele
         workspaceId,
         taskId: selectedTask.id,
       });
-      if (data.length === 0) {
+      if (data.message && !data.errors) {
         setUpdates((prev) => [{ message, progress, created_at: new Date() }, ...prev]);
         setSelectedTask((prev) => ({ ...prev, status: "doing" }));
+        onTaskChange?.();
       }
       setDoingMessage(data.message);
     } catch (err) {
@@ -115,6 +115,7 @@ function TaskModal({ isOpen, setIsOpen, selectedTask, user, workspaceId, setSele
       if (res.update) {
         setUpdates((prev) => [res.update, ...prev]);
         setSelectedTask((prev) => ({ ...prev, status: "done" }));
+        onTaskChange?.();
       }
       setDoneMessage(res.message);
     } catch (error) {
@@ -258,7 +259,7 @@ function TaskModal({ isOpen, setIsOpen, selectedTask, user, workspaceId, setSele
               </div>
 
               {submitMessage && <p className="text-xs text-gray-500 whitespace-pre-line">{submitMessage}</p>}
-                  
+
               <button className="w-full bg-gray-900 text-white py-2 rounded-lg text-sm font-medium hover:opacity-90 transition-opacity">
                 Add update
               </button>
@@ -284,7 +285,7 @@ function TaskModal({ isOpen, setIsOpen, selectedTask, user, workspaceId, setSele
   );
 }
 
-function TaskList({ tasks = [], taskMessage, user, workspaceId }) {
+function TaskList({ tasks = [], taskMessage, user, workspaceId, onTaskChange }) {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -349,7 +350,7 @@ function TaskList({ tasks = [], taskMessage, user, workspaceId }) {
           </div>
         </div>
         <div className="p-4">
-          
+
           {tasks.length > 0 ? (
             <div className="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-4">
               {paginatedTasks.map((task) => (
@@ -421,6 +422,7 @@ function TaskList({ tasks = [], taskMessage, user, workspaceId }) {
           user={user}
           workspaceId={workspaceId}
           setSelectedTask={setSelectedTask}
+          onTaskChange={onTaskChange}
         />
       )}
     </>

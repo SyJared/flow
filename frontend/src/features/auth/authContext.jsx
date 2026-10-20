@@ -15,15 +15,15 @@ export const AuthProvider = ({ children }) => {
 };
 
   useEffect(() => {
-   
+
     const loadUser = async () => {
       try {
         const data = await getMe();
-        
+
         setUser(data.user);
       } catch (err) {
         localStorage.removeItem("token");
-        setUser(null); 
+        setUser(null);
       } finally {
         setUserLoading(false);
       }
@@ -31,14 +31,6 @@ export const AuthProvider = ({ children }) => {
 
     loadUser();
   }, []);
-
-  const defaultUser = {
-  id: null,
-  name: '',
-  email: '',
-};
-
-
 
   return (
     <AuthContext.Provider value={{ user, setUser, userLoading, logout }}>

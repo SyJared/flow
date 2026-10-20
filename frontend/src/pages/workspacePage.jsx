@@ -20,7 +20,7 @@ function WorkspacePage() {
   const [loading, setLoading] = useState(true);
   const [workspace, setWorkspace] = useState(null);
   const { id } = useParams();
- 
+
   const [nameParam, setNameParam] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [searchMessage, setSearchMessage] = useState('');
@@ -36,7 +36,7 @@ function WorkspacePage() {
 
   const [recommended, setRecommended] = useState([])
 
-  
+
 
   const [taskInfo, setTaskInfo] = useState({
     workspaceId: id,
@@ -70,9 +70,7 @@ function WorkspacePage() {
       const data = await getWorkspaceById(id);
       const membersData = await getWorkspaceMembers(id);
       const tasksData = await getTask(workspaceId);
-      console.log("Workspace data: ", tasksData);
       setWorkspace(data.workspace);
-      console.log(data)
       // SAFE MEMBERS
       setMembers(membersData.members || []);
 
@@ -102,7 +100,7 @@ function WorkspacePage() {
   const handleSearch = async (e) => {
     e.preventDefault();
     try {
-      
+
       const res = await searchName(nameParam);
       setSearchResults(res.users);
       setSearchMessage(res.message);
@@ -118,8 +116,6 @@ function WorkspacePage() {
     if(res.success){
       setRecommended(res.recommendation)
     }
-    console.log("reccoo" ,recommended)
-    console.log("res",res)
   } catch (err) {
     console.log(err)
   }
@@ -132,7 +128,11 @@ function WorkspacePage() {
       if(res?.errors){
         setAssignMessage(res.errors.map(e => `${e.message}`).join('\n'));
       }
-      console.log(res);
+      if (res.success) {
+        setSelectedUser({ user: null, role: 'member' });
+        const refreshed = await getWorkspaceMembers(id);
+        setMembers(refreshed.members || []);
+      }
     } catch (err) {
       console.error(err);
     }
@@ -152,6 +152,8 @@ function WorkspacePage() {
 
     setTaskErrors([]);
     setTaskMessage(res.message);
+    const refreshed = await getTask(id);
+    setTasks(Array.isArray(refreshed.tasks) ? refreshed.tasks : []);
 
   } catch (err) {
     console.error(err);
@@ -164,7 +166,11 @@ function WorkspacePage() {
     try {
       const res = await editMember({ id: id, role: memberRoleEdit.role, memberId: selectedEdit.id });
       setEditMemberRoleMessage(res.message);
-      console.log(res);
+      if (res.success) {
+        const refreshed = await getWorkspaceMembers(id);
+        setMembers(refreshed.members || []);
+        setSelectedEdit(current => current ? { ...current, role: memberRoleEdit.role } : current);
+      }
     } catch (err) {
       console.log(err);
     }
@@ -326,7 +332,7 @@ const getLabel = (days) => {
             <form onSubmit={handleSearch}>
               <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">Search by name</label>
               <div className="flex">
-                <input 
+                <input
                   type="text"
                   placeholder="Enter a user name…"
                   value={nameParam}
@@ -445,7 +451,7 @@ const getLabel = (days) => {
                   value={taskInfo.assignedTo}
                   onChange={(e) => setTaskInfo({ ...taskInfo, assignedTo: e.target.value })}
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 bg-white outline-none focus:border-gray-400"
-                > 
+                >
                   {members.map((m) => (
                     <option key={m.id} value={m.id}>{m.name} ({m.role})</option>
                   ))}
@@ -512,6 +518,10 @@ const getLabel = (days) => {
   taskMessage={tasksMessage}
   user={user?.id}
   workspaceId={id}
+  onTaskChange={async () => {
+    const refreshed = await getTask(id);
+    setTasks(Array.isArray(refreshed.tasks) ? refreshed.tasks : []);
+  }}
 />
 
       </div>

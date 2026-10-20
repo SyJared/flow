@@ -14,7 +14,6 @@ function getInitials(name = "") {
     .toUpperCase()
     .slice(0, 2);
 }
- //ddd
 function formatDate(d) {
   if (!d) return "—";
   return new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric" });
@@ -123,7 +122,7 @@ function DashboardPage() {
         setPastDue(past?.results ?? { completedPastDue: 0, urgentTask: null })
 
       } catch (err) {
-        console.error("Dashboard load error:", err);  
+        console.error("Dashboard load error:", err);
       } finally {
         setLoading(false);
       }
@@ -187,7 +186,7 @@ const handleSummary = async () => {
       return new Date(a.due_date) - new Date(b.due_date);
     });
 
- 
+
   // unique members across all workspaces via tasks
   const memberMap = new Map();
   tasks.forEach((t) => {
@@ -204,7 +203,7 @@ const handleSummary = async () => {
   const wsTaskCount = (wsName) =>
     tasks.filter((t) => t.workspace_name === wsName).length;
 
-  
+
 
   if (loading) {
     return (
@@ -214,7 +213,6 @@ const handleSummary = async () => {
       </div>
     );
   }
-console.log(tasks)
   return (
     <>
       <style>{`

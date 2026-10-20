@@ -138,13 +138,12 @@ function TasksPage() {
         const data = await getAllTaskByUserId(userId);
         if (Array.isArray(data.results)) {
           setTasks(data.results);
-          
+
         } else {
           setTasks([]);
           setError(data.message);
         }
 
-        console.log("Fetched tasks:", data);
       } catch (err) {
         console.error(err);
         setError("Failed to load tasks.");
@@ -154,13 +153,12 @@ function TasksPage() {
       }
     };
     load();
-    
+
   }, [userId]);
 
   useEffect(() => {
     setCurrentPage(1);
   }, [statusFilter, priorityFilter, search]);
-  console.log(tasks)
   // Derived filtered tasks
   const filtered = tasks.filter((t) => {
     const matchStatus = statusFilter === "all" || t.status === statusFilter;
@@ -205,7 +203,7 @@ function TasksPage() {
 
         {/* Page Header */}
         <div className="mb-8">
-          
+
           <div className="flex items-start justify-between gap-4 flex-wrap">
             <div>
               <h1 className="text-2xl font-bold text-[#202940] tracking-tight">Tasks overview</h1>
@@ -297,7 +295,7 @@ function TasksPage() {
           </select>
         </div>
 
-        
+
 
         {/* Task Grid */}
         <div className="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-4">
